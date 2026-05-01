@@ -118,7 +118,7 @@ export default function AppShell({ children, currentPage, onNavigate }: Props) {
       {/* Mobile bottom nav */}
       {user.role === "student" && (
         <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border">
-          <div className="grid grid-cols-5 gap-1 px-2 py-2">
+          <div className="grid grid-cols-6 gap-1 px-2 py-2">
             {NAV.map(item => (
               <button
                 key={item.id}
