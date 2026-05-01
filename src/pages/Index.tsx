@@ -1,16 +1,42 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import StudentDashboard from "@/components/student/StudentDashboard";
+import StudyPlan from "@/components/student/StudyPlan";
+import Exercises from "@/components/student/Exercises";
+import LiveLessons from "@/components/student/LiveLessons";
+import Achievements from "@/components/student/Achievements";
+import TeacherDashboard from "@/components/teacher/TeacherDashboard";
+import AppShell from "@/components/layout/AppShell";
+import Landing from "@/components/landing/Landing";
+import { AppContext, useAppState } from "@/lib/state";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const state = useAppState();
+  const [page, setPage] = useState<string>("dashboard");
+
+  if (!state.user) return (
+    <AppContext.Provider value={state}>
+      <Landing />
+    </AppContext.Provider>
+  );
+
+  const renderPage = () => {
+    if (state.user?.role === "teacher") return <TeacherDashboard />;
+    switch (page) {
+      case "plan": return <StudyPlan />;
+      case "exercises": return <Exercises />;
+      case "live": return <LiveLessons />;
+      case "achievements": return <Achievements />;
+      default: return <StudentDashboard onNavigate={setPage} />;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
+    <AppContext.Provider value={state}>
+      <AppShell currentPage={page} onNavigate={setPage}>
+        {renderPage()}
+      </AppShell>
+    </AppContext.Provider>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
