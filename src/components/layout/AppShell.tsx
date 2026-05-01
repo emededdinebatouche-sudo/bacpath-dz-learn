@@ -2,13 +2,14 @@ import { ReactNode, useState } from "react";
 import { useApp } from "@/lib/state";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, LayoutDashboard, ListTodo, BookOpen, Video, Trophy, LogOut, Menu, X } from "lucide-react";
+import { GraduationCap, LayoutDashboard, ListTodo, BookOpen, Video, Trophy, Compass, LogOut, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { id: "dashboard", label: "الرئيسية", icon: LayoutDashboard },
   { id: "plan", label: "خطة اليوم", icon: ListTodo },
   { id: "exercises", label: "التمارين", icon: BookOpen },
+  { id: "guide", label: "دليلي", icon: Compass },
   { id: "live", label: "الدروس المباشرة", icon: Video },
   { id: "achievements", label: "الإنجازات", icon: Trophy },
 ];
@@ -117,7 +118,7 @@ export default function AppShell({ children, currentPage, onNavigate }: Props) {
       {/* Mobile bottom nav */}
       {user.role === "student" && (
         <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border">
-          <div className="grid grid-cols-5 gap-1 px-2 py-2">
+          <div className="grid grid-cols-6 gap-1 px-2 py-2">
             {NAV.map(item => (
               <button
                 key={item.id}

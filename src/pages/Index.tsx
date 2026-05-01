@@ -4,6 +4,7 @@ import StudyPlan from "@/components/student/StudyPlan";
 import Exercises from "@/components/student/Exercises";
 import LiveLessons from "@/components/student/LiveLessons";
 import Achievements from "@/components/student/Achievements";
+import Guide from "@/components/student/Guide";
 import TeacherDashboard from "@/components/teacher/TeacherDashboard";
 import AppShell from "@/components/layout/AppShell";
 import Landing from "@/components/landing/Landing";
@@ -24,6 +25,7 @@ const Index = () => {
     switch (page) {
       case "plan": return <StudyPlan />;
       case "exercises": return <Exercises />;
+      case "guide": return <Guide />;
       case "live": return <LiveLessons />;
       case "achievements": return <Achievements />;
       default: return <StudentDashboard onNavigate={setPage} />;
