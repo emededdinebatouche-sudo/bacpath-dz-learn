@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 import StudentDashboard from "@/components/student/StudentDashboard";
 import StudyPlan from "@/components/student/StudyPlan";
 import Exercises from "@/components/student/Exercises";
@@ -14,11 +15,26 @@ const Index = () => {
   const state = useAppState();
   const [page, setPage] = useState<string>("dashboard");
 
-  if (!state.user) return (
-    <AppContext.Provider value={state}>
-      <Landing />
-    </AppContext.Provider>
-  );
+  if (state.loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  if (!state.session) {
+    return (
+      <AppContext.Provider value={state}>
+        <Landing />
+      </AppContext.Provider>
+    );
+  }
+
+  if (!state.user) {
+    // Signed in but profile/role still loading or missing
+    return <Navigate to="/auth" replace />;
+  }
 
   const renderPage = () => {
     if (state.user?.role === "teacher") return <TeacherDashboard />;

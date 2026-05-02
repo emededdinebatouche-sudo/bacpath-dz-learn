@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User as SupaUser, Session } from "@supabase/supabase-js";
 
 export type Subject = "math" | "physics" | "chemistry" | "history";
 
@@ -9,21 +11,24 @@ export const SUBJECT_META: Record<Subject, { label: string; emoji: string; color
   history: { label: "التاريخ والجغرافيا", emoji: "🌍", color: "from-amber-500 to-orange-600" },
 };
 
-export type User = {
+export type Role = "student" | "teacher";
+
+export type AppUser = {
+  id: string;
   name: string;
   email: string;
-  role: "student" | "teacher";
+  role: Role;
   points: number;
   level: number;
   streak: number;
-  avatar?: string;
+  stream?: string | null;
 };
 
 export type Task = {
   id: string;
   title: string;
   subject: Subject;
-  duration: number; // minutes
+  duration: number;
   points: number;
   done: boolean;
 };
@@ -45,51 +50,79 @@ export const useApp = () => {
   return ctx;
 };
 
+async function loadAppUser(supaUser: SupaUser): Promise<AppUser | null> {
+  const [{ data: profile }, { data: roleRow }] = await Promise.all([
+    supabase.from("profiles").select("full_name, points, level, streak, stream").eq("id", supaUser.id).maybeSingle(),
+    supabase.from("user_roles").select("role").eq("user_id", supaUser.id).maybeSingle(),
+  ]);
+  if (!roleRow) return null;
+  return {
+    id: supaUser.id,
+    email: supaUser.email ?? "",
+    name: profile?.full_name || supaUser.email?.split("@")[0] || "مستخدم",
+    role: roleRow.role as Role,
+    points: profile?.points ?? 0,
+    level: profile?.level ?? 1,
+    streak: profile?.streak ?? 0,
+    stream: profile?.stream ?? null,
+  };
+}
+
 export function useAppState() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
   useEffect(() => {
-    const saved = localStorage.getItem("bacpath_user");
-    if (saved) setUser(JSON.parse(saved));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+      setSession(sess);
+      if (sess?.user) {
+        setTimeout(() => {
+          loadAppUser(sess.user).then(u => { setUser(u); setLoading(false); });
+        }, 0);
+      } else {
+        setUser(null);
+        setLoading(false);
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session: sess } }) => {
+      setSession(sess);
+      if (sess?.user) {
+        loadAppUser(sess.user).then(u => { setUser(u); setLoading(false); });
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (user) localStorage.setItem("bacpath_user", JSON.stringify(user));
-  }, [user]);
-
-  const login = (role: "student" | "teacher", name?: string, email?: string) => {
-    setUser({
-      name: name || (role === "teacher" ? "الأستاذ كريم بن عيسى" : "أمين الجزائري"),
-      email: email || (role === "teacher" ? "teacher@bacpath.dz" : "student@bacpath.dz"),
-      role,
-      points: role === "student" ? 1280 : 0,
-      level: role === "student" ? 2 : 0,
-      streak: role === "student" ? 7 : 0,
-    });
-  };
-
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("bacpath_user");
+    setSession(null);
   };
 
-  const completeTask = (id: string) => {
+  const completeTask = async (id: string) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, done: true } : t));
     const task = tasks.find(t => t.id === id);
     if (task && !task.done && user) {
       const newPoints = user.points + task.points;
       const newLevel = Math.floor(newPoints / 1000) + 1;
       setUser({ ...user, points: newPoints, level: newLevel });
+      await supabase.from("profiles").update({ points: newPoints, level: newLevel }).eq("id", user.id);
     }
   };
 
-  const addPoints = (pts: number) => {
+  const addPoints = async (pts: number) => {
     if (!user) return;
     const newPoints = user.points + pts;
     const newLevel = Math.floor(newPoints / 1000) + 1;
     setUser({ ...user, points: newPoints, level: newLevel });
+    await supabase.from("profiles").update({ points: newPoints, level: newLevel }).eq("id", user.id);
   };
 
-  return { user, tasks, login, logout, completeTask, addPoints };
+  return { user, session, loading, tasks, logout, completeTask, addPoints };
 }
