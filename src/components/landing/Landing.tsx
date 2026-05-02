@@ -62,11 +62,6 @@ export default function Landing() {
             </div>
             <div className="flex items-center gap-6 pt-4 justify-center lg:justify-start text-sm text-muted-foreground">
               <div><span className="font-bold text-foreground text-lg">+12K</span> طالب</div>
-              <div className="h-4 w-px bg-border" />
-              <div><span className="font-bold text-foreground text-lg">+450</span> أستاذ</div>
-              <div className="h-4 w-px bg-border" />
-              <div><span className="font-bold text-foreground text-lg">98%</span> رضا</div>
-            </div>
           </div>
           <div className="relative animate-scale-in">
             <div className="absolute inset-0 bg-gradient-primary rounded-full blur-3xl opacity-20 animate-pulse-glow" />
