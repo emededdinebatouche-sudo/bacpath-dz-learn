@@ -10,7 +10,7 @@ const NAV = [
   { id: "plan", label: "خطة اليوم", icon: ListTodo },
   { id: "exercises", label: "التمارين", icon: BookOpen },
   { id: "guide", label: "دليلي", icon: Compass },
-  { id: "live", label: "الدروس المباشرة", icon: Video },
+  { id: "live", label: "مباشر", icon: Video },
   { id: "achievements", label: "الإنجازات", icon: Trophy },
 ];
 
@@ -118,18 +118,18 @@ export default function AppShell({ children, currentPage, onNavigate }: Props) {
       {/* Mobile bottom nav */}
       {user.role === "student" && (
         <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border">
-          <div className="grid grid-cols-6 gap-1 px-2 py-2">
+          <div className="grid grid-cols-6 gap-0.5 px-1 py-2">
             {NAV.map(item => (
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-1.5 rounded-lg transition-smooth",
+                  "flex flex-col items-center gap-1 py-1.5 px-0.5 rounded-lg transition-smooth min-w-0",
                   currentPage === item.id ? "text-primary" : "text-muted-foreground"
                 )}
               >
-                <item.icon className="h-5 w-5" />
-                <span className="text-[10px] font-semibold">{item.label}</span>
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <span className="text-[9px] font-semibold truncate w-full text-center leading-tight">{item.label}</span>
               </button>
             ))}
           </div>
