@@ -71,11 +71,11 @@ export default function TeacherDashboard() {
           <StatCard icon={Video} label="حصص قادمة" value="3" gradient="from-pink-500 to-rose-600" />
         </div>
 
-        <Tabs defaultValue="content">
+        <Tabs defaultValue="live">
           <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="content">المحتوى</TabsTrigger>
             <TabsTrigger value="live">الحصص المباشرة</TabsTrigger>
             <TabsTrigger value="students">تقدّم الطلاب</TabsTrigger>
+            <TabsTrigger value="content">تمارين (اختياري)</TabsTrigger>
           </TabsList>
 
           <TabsContent value="content" className="space-y-4 mt-5">

@@ -71,8 +71,10 @@ export default function StudentDashboard({ onNavigate }: Props) {
         <div className="flex items-center gap-4 mb-4">
           <div className="text-3xl font-display font-extrabold text-gradient">{doneToday}/{tasks.length}</div>
           <div className="flex-1">
-            <Progress value={(doneToday / tasks.length) * 100} className="h-2.5" />
-            <p className="text-xs text-muted-foreground mt-1.5 font-semibold">مهام مكتملة اليوم</p>
+            <Progress value={tasks.length ? (doneToday / tasks.length) * 100 : 0} className="h-2.5" />
+            <p className="text-xs text-muted-foreground mt-1.5 font-semibold">
+              {tasks.length ? "مهام مكتملة اليوم" : "أضف مهامك من خطة اليوم"}
+            </p>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
