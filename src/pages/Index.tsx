@@ -7,6 +7,7 @@ import LiveLessons from "@/components/student/LiveLessons";
 import Achievements from "@/components/student/Achievements";
 import Guide from "@/components/student/Guide";
 import TeacherDashboard from "@/components/teacher/TeacherDashboard";
+import AdminDashboard from "@/components/admin/AdminDashboard";
 import AppShell from "@/components/layout/AppShell";
 import Landing from "@/components/landing/Landing";
 import { AppContext, useAppState } from "@/lib/state";
@@ -34,6 +35,14 @@ const Index = () => {
   if (!state.user) {
     // Signed in but profile/role still loading or missing
     return <Navigate to="/auth" replace />;
+  }
+
+  if (state.user?.role === "admin") {
+    return (
+      <AppContext.Provider value={state}>
+        <AdminDashboard />
+      </AppContext.Provider>
+    );
   }
 
   const renderPage = () => {
