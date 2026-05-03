@@ -80,7 +80,7 @@ export default function TeacherDashboard() {
 
           <TabsContent value="content" className="space-y-4 mt-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-display font-bold text-lg">دروسي وتماريني</h2>
+              <h2 className="font-display font-bold text-lg">تماريني (اختياري)</h2>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-gradient-primary hover:opacity-95 gap-2 shadow-primary">
