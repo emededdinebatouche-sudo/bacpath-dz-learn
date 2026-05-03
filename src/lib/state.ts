@@ -112,11 +112,12 @@ export function useAppState() {
     setTasks([]);
   };
 
-  const completeTask = async (id: string) => {
+  const completeTask = async (id: string, awardedPoints?: number) => {
     const task = tasks.find(t => t.id === id);
     if (!task || task.done || !user) return;
+    const award = awardedPoints ?? task.points;
     setTasks(prev => prev.map(t => t.id === id ? { ...t, done: true } : t));
-    const newPoints = user.points + task.points;
+    const newPoints = user.points + award;
     const newLevel = Math.floor(newPoints / 1000) + 1;
     setUser({ ...user, points: newPoints, level: newLevel });
     await Promise.all([
