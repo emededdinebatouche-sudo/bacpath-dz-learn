@@ -11,7 +11,7 @@ export const SUBJECT_META: Record<Subject, { label: string; emoji: string; color
   history: { label: "التاريخ والجغرافيا", emoji: "🌍", color: "from-amber-500 to-orange-600" },
 };
 
-export type Role = "student" | "teacher";
+export type Role = "student" | "teacher" | "admin";
 
 export type AppUser = {
   id: string;
