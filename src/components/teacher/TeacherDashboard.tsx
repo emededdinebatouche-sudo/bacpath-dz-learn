@@ -71,16 +71,16 @@ export default function TeacherDashboard() {
           <StatCard icon={Video} label="حصص قادمة" value="3" gradient="from-pink-500 to-rose-600" />
         </div>
 
-        <Tabs defaultValue="content">
+        <Tabs defaultValue="live">
           <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="content">المحتوى</TabsTrigger>
             <TabsTrigger value="live">الحصص المباشرة</TabsTrigger>
             <TabsTrigger value="students">تقدّم الطلاب</TabsTrigger>
+            <TabsTrigger value="content">تمارين (اختياري)</TabsTrigger>
           </TabsList>
 
           <TabsContent value="content" className="space-y-4 mt-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-display font-bold text-lg">دروسي وتماريني</h2>
+              <h2 className="font-display font-bold text-lg">تماريني (اختياري)</h2>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-gradient-primary hover:opacity-95 gap-2 shadow-primary">

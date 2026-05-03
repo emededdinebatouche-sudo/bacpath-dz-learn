@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupaUser, Session } from "@supabase/supabase-js";
 
@@ -33,13 +33,6 @@ export type Task = {
   done: boolean;
 };
 
-const initialTasks: Task[] = [
-  { id: "t1", title: "حل 10 تمارين في النهايات والاتصال", subject: "math", duration: 45, points: 50, done: false },
-  { id: "t2", title: "مراجعة درس الحقل المغناطيسي", subject: "physics", duration: 30, points: 40, done: false },
-  { id: "t3", title: "تحضير ملخص: الحرب الباردة", subject: "history", duration: 25, points: 30, done: true },
-  { id: "t4", title: "حفظ المعادلات الكيميائية الرئيسية", subject: "chemistry", duration: 20, points: 25, done: false },
-];
-
 type AppState = ReturnType<typeof useAppState>;
 
 export const AppContext = createContext<AppState | null>(null);
@@ -72,17 +65,29 @@ export function useAppState() {
   const [user, setUser] = useState<AppUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  const loadTasks = useCallback(async (uid: string) => {
+    const { data } = await supabase
+      .from("tasks" as any)
+      .select("*")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: true });
+    if (data) setTasks(data as any);
+  }, []);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
       if (sess?.user) {
+        const uid = sess.user.id;
         setTimeout(() => {
           loadAppUser(sess.user).then(u => { setUser(u); setLoading(false); });
+          loadTasks(uid);
         }, 0);
       } else {
         setUser(null);
+        setTasks([]);
         setLoading(false);
       }
     });
@@ -91,29 +96,48 @@ export function useAppState() {
       setSession(sess);
       if (sess?.user) {
         loadAppUser(sess.user).then(u => { setUser(u); setLoading(false); });
+        loadTasks(sess.user.id);
       } else {
         setLoading(false);
       }
     });
 
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [loadTasks]);
 
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
+    setTasks([]);
   };
 
   const completeTask = async (id: string) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, done: true } : t));
     const task = tasks.find(t => t.id === id);
-    if (task && !task.done && user) {
-      const newPoints = user.points + task.points;
-      const newLevel = Math.floor(newPoints / 1000) + 1;
-      setUser({ ...user, points: newPoints, level: newLevel });
-      await supabase.from("profiles").update({ points: newPoints, level: newLevel }).eq("id", user.id);
-    }
+    if (!task || task.done || !user) return;
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, done: true } : t));
+    const newPoints = user.points + task.points;
+    const newLevel = Math.floor(newPoints / 1000) + 1;
+    setUser({ ...user, points: newPoints, level: newLevel });
+    await Promise.all([
+      supabase.from("tasks" as any).update({ done: true }).eq("id", id),
+      supabase.from("profiles").update({ points: newPoints, level: newLevel }).eq("id", user.id),
+    ]);
+  };
+
+  const addTask = async (input: { title: string; subject: Subject; duration: number; points: number }) => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("tasks" as any)
+      .insert({ ...input, user_id: user.id, done: false })
+      .select()
+      .single();
+    if (!error && data) setTasks(prev => [...prev, data as any]);
+  };
+
+  const deleteTask = async (id: string) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+    await supabase.from("tasks" as any).delete().eq("id", id);
   };
 
   const addPoints = async (pts: number) => {
@@ -124,5 +148,5 @@ export function useAppState() {
     await supabase.from("profiles").update({ points: newPoints, level: newLevel }).eq("id", user.id);
   };
 
-  return { user, session, loading, tasks, logout, completeTask, addPoints };
+  return { user, session, loading, tasks, logout, completeTask, addTask, deleteTask, addPoints };
 }
