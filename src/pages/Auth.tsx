@@ -44,9 +44,19 @@ export default function AuthPage() {
   const [role, setRole] = useState<"student" | "teacher">("student");
   const [stream, setStream] = useState<string>("sciences");
 
+  const redirectFor = async (email: string | undefined, userId: string) => {
+    if (email === "batoucheimad0@gmail.com") return "/admin";
+    const { data: roleRow } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
+    if (roleRow?.role === "teacher") return "/teacher";
+    return "/dashboard";
+  };
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/", { replace: true });
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
+        const path = await redirectFor(session.user.email, session.user.id);
+        navigate(path, { replace: true });
+      }
     });
   }, [navigate]);
 
@@ -78,7 +88,13 @@ export default function AuthPage() {
           return;
         }
         toast({ title: "تم إنشاء الحساب", description: "مرحباً بك في BacPath" });
-        navigate("/", { replace: true });
+        const { data: { session: s2 } } = await supabase.auth.getSession();
+        if (s2) {
+          const path = await redirectFor(s2.user.email, s2.user.id);
+          navigate(path, { replace: true });
+        } else {
+          navigate("/auth", { replace: true });
+        }
       } else {
         const parsed = loginSchema.safeParse({ email, password });
         if (!parsed.success) {
@@ -94,7 +110,11 @@ export default function AuthPage() {
           toast({ title: "تعذّر تسجيل الدخول", description: msg, variant: "destructive" });
           return;
         }
-        navigate("/", { replace: true });
+        const { data: { session: s2 } } = await supabase.auth.getSession();
+        if (s2) {
+          const path = await redirectFor(s2.user.email, s2.user.id);
+          navigate(path, { replace: true });
+        }
       }
     } finally {
       setSubmitting(false);

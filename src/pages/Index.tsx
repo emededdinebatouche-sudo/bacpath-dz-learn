@@ -32,17 +32,16 @@ const Index = () => {
     );
   }
 
+  if (state.session.user.email === "batoucheimad0@gmail.com") {
+    return <Navigate to="/admin" replace />;
+  }
+
   if (!state.user) {
-    // Signed in but profile/role still loading or missing
     return <Navigate to="/auth" replace />;
   }
 
-  if (state.user?.role === "admin") {
-    return (
-      <AppContext.Provider value={state}>
-        <AdminDashboard />
-      </AppContext.Provider>
-    );
+  if (state.user.role === "admin") {
+    return <Navigate to="/admin" replace />;
   }
 
   const renderPage = () => {
