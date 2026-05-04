@@ -44,9 +44,19 @@ export default function AuthPage() {
   const [role, setRole] = useState<"student" | "teacher">("student");
   const [stream, setStream] = useState<string>("sciences");
 
+  const redirectFor = async (email: string | undefined, userId: string) => {
+    if (email === "batoucheimad0@gmail.com") return "/admin";
+    const { data: roleRow } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
+    if (roleRow?.role === "teacher") return "/teacher";
+    return "/dashboard";
+  };
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/", { replace: true });
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
+        const path = await redirectFor(session.user.email, session.user.id);
+        navigate(path, { replace: true });
+      }
     });
   }, [navigate]);
 
