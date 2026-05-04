@@ -106,10 +106,15 @@ export function useAppState() {
   }, [loadTasks]);
 
   const logout = async () => {
-    await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setTasks([]);
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn("signOut error", e);
+    }
+    window.location.href = "/";
   };
 
   const completeTask = async (id: string, awardedPoints?: number) => {

@@ -11,7 +11,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (state.loading) return;
     if (!state.session) {
-      navigate("/auth", { replace: true });
+      navigate("/", { replace: true });
       return;
     }
     const email = state.session.user.email;
