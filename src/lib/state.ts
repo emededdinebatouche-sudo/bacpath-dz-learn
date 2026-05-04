@@ -102,30 +102,26 @@ export function useAppState() {
   }, []);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+    const handle = (sess: Session | null) => {
       setSession(sess);
       if (sess?.user) {
-        const uid = sess.user.id;
+        // Show dashboard immediately with defaults
+        setUser(defaultUser(sess.user));
+        setLoading(false);
+        // Load real profile in background
         setTimeout(() => {
-          loadAppUser(sess.user).then(u => { setUser(u); setLoading(false); });
-          loadTasks(uid);
+          loadAppUser(sess.user).then(u => setUser(u));
+          loadTasks(sess.user.id);
         }, 0);
       } else {
         setUser(null);
         setTasks([]);
         setLoading(false);
       }
-    });
+    };
 
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
-      setSession(sess);
-      if (sess?.user) {
-        loadAppUser(sess.user).then(u => { setUser(u); setLoading(false); });
-        loadTasks(sess.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => handle(sess));
+    supabase.auth.getSession().then(({ data: { session: sess } }) => handle(sess));
 
     return () => sub.subscription.unsubscribe();
   }, [loadTasks]);
