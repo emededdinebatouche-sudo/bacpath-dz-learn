@@ -13,6 +13,7 @@ import { useApp, SUBJECT_META, Subject } from "@/lib/state";
 import { Plus, BookOpen, Video, Users, GraduationCap, LogOut, TrendingUp, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import ExerciseManager from "@/components/exercises/ExerciseManager";
 
 const STUDENTS = [
   { name: "أمين الجزائري", points: 1280, level: 2, progress: 78 },
