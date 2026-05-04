@@ -79,78 +79,7 @@ export default function TeacherDashboard() {
           </TabsList>
 
           <TabsContent value="content" className="space-y-4 mt-5">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display font-bold text-lg">تماريني (اختياري)</h2>
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-gradient-primary hover:opacity-95 gap-2 shadow-primary">
-                    <Plus className="h-4 w-4" /> إضافة جديد
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle className="font-display">إضافة درس / تمرين</DialogTitle></DialogHeader>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    const fd = new FormData(e.currentTarget);
-                    setLessons(prev => [...prev, { title: fd.get("title") as string, subject: fd.get("subject") as Subject, type: fd.get("type") as string }]);
-                    setOpen(false);
-                    toast.success("تمت الإضافة بنجاح ✅");
-                  }} className="space-y-3">
-                    <div>
-                      <Label>العنوان</Label>
-                      <Input name="title" required placeholder="مثال: تمارين النهايات" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>المادة</Label>
-                        <Select name="subject" defaultValue="math">
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {(Object.keys(SUBJECT_META) as Subject[]).map(s => (
-                              <SelectItem key={s} value={s}>{SUBJECT_META[s].emoji} {SUBJECT_META[s].label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>النوع</Label>
-                        <Select name="type" defaultValue="درس">
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="درس">درس</SelectItem>
-                            <SelectItem value="تمرين">تمرين</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div>
-                      <Label>الوصف</Label>
-                      <Textarea placeholder="وصف مختصر..." rows={3} />
-                    </div>
-                    <Button type="submit" className="w-full bg-gradient-primary hover:opacity-95">حفظ</Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <div className="grid md:grid-cols-2 gap-3">
-              {lessons.map((l, i) => {
-                const m = SUBJECT_META[l.subject];
-                return (
-                  <Card key={i} className="p-4 bg-gradient-card border-border/60 card-hover">
-                    <div className="flex items-center gap-3">
-                      <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${m.color} flex items-center justify-center text-2xl`}>{m.emoji}</div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex gap-1.5 mb-1">
-                          <Badge variant="secondary" className="text-[10px] font-bold">{m.label}</Badge>
-                          <Badge variant="outline" className="text-[10px]">{l.type}</Badge>
-                        </div>
-                        <h3 className="font-display font-bold text-sm truncate">{l.title}</h3>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
+            <ExerciseManager />
           </TabsContent>
 
           <TabsContent value="live" className="space-y-4 mt-5">

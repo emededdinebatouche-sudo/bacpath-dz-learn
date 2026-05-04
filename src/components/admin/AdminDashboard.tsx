@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { GraduationCap, LogOut, Users, BookOpen, Compass, Video, Shield, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ExerciseManager from "@/components/exercises/ExerciseManager";
 
 type Profile = {
   id: string;
@@ -174,6 +175,8 @@ export default function AdminDashboard() {
                 </Card>
               ))}
             </div>
+          ) : tab === "exercises" ? (
+            <ExerciseManager />
           ) : (
             <Card className="p-8 text-center space-y-2">
               <h2 className="text-xl font-display font-extrabold">قريباً</h2>
