@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      exercises: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string
+          difficulty: string
+          duration: number
+          id: string
+          points: number
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          created_by: string
+          difficulty?: string
+          duration?: number
+          id?: string
+          points?: number
+          subject: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          difficulty?: string
+          duration?: number
+          id?: string
+          points?: number
+          subject?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

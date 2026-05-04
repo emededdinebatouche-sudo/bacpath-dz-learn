@@ -1,25 +1,25 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useApp, SUBJECT_META, Subject } from "@/lib/state";
-import { BookOpen, Zap, ChevronLeft } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useApp } from "@/lib/state";
+import { BookOpen, Zap, ChevronLeft, Clock, Check, Square, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type Exercise = { id: string; title: string; subject: Subject; difficulty: "سهل" | "متوسط" | "صعب"; questions: number; points: number; };
-
-const EXERCISES: Exercise[] = [
-  { id: "e1", title: "النهايات والاتصال — تمارين شاملة", subject: "math", difficulty: "متوسط", questions: 12, points: 60 },
-  { id: "e2", title: "الاشتقاق وتطبيقاته", subject: "math", difficulty: "صعب", questions: 8, points: 80 },
-  { id: "e3", title: "حساب المثلثات", subject: "math", difficulty: "سهل", questions: 15, points: 40 },
-  { id: "e4", title: "الحقل المغناطيسي", subject: "physics", difficulty: "متوسط", questions: 10, points: 55 },
-  { id: "e5", title: "الموجات الميكانيكية", subject: "physics", difficulty: "صعب", questions: 8, points: 75 },
-  { id: "e6", title: "التفاعلات الكيميائية", subject: "chemistry", difficulty: "متوسط", questions: 10, points: 50 },
-  { id: "e7", title: "الكيمياء العضوية — الأساسيات", subject: "chemistry", difficulty: "سهل", questions: 12, points: 35 },
-  { id: "e8", title: "الحرب العالمية الثانية", subject: "history", difficulty: "متوسط", questions: 14, points: 45 },
-  { id: "e9", title: "الثورة الجزائرية: المراحل الكبرى", subject: "history", difficulty: "صعب", questions: 16, points: 70 },
-];
+type Exercise = {
+  id: string;
+  title: string;
+  subject: string;
+  difficulty: "سهل" | "متوسط" | "صعب";
+  content: string;
+  points: number;
+  duration: number;
+};
 
 const DIFF_COLORS: Record<Exercise["difficulty"], string> = {
   "سهل": "bg-success/15 text-success border-success/30",
@@ -27,15 +27,101 @@ const DIFF_COLORS: Record<Exercise["difficulty"], string> = {
   "صعب": "bg-destructive/15 text-destructive border-destructive/30",
 };
 
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const beep = (f: number, s: number, d: number) => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.frequency.value = f; o.type = "sine"; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime + s);
+      g.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + s + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + s + d);
+      o.start(ctx.currentTime + s); o.stop(ctx.currentTime + s + d);
+    };
+    beep(880, 0, 0.4); beep(660, 0.5, 0.4); beep(880, 1.0, 0.6);
+  } catch {}
+}
+
+function computeAward(base: number, durationMin: number, elapsedSec: number) {
+  const planned = durationMin * 60;
+  if (elapsedSec < planned) return Math.round(base * 1.2);
+  if (elapsedSec === planned) return base;
+  const extraMin = Math.floor((elapsedSec - planned) / 60);
+  return Math.max(0, Math.round(base * Math.max(0, 1 - Math.floor(extraMin / 10) * 0.1)));
+}
+
 export default function Exercises() {
   const { addPoints } = useApp();
-  const [filter, setFilter] = useState<Subject | "all">("all");
-  const filtered = filter === "all" ? EXERCISES : EXERCISES.filter(e => e.subject === filter);
+  const [items, setItems] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [subjectFilter, setSubjectFilter] = useState<string>("all");
+  const [diffFilter, setDiffFilter] = useState<string>("all");
 
-  const handleStart = (e: Exercise) => {
-    addPoints(e.points);
-    toast.success(`تمت إضافة +${e.points} نقطة!`, { description: `أكملت: ${e.title}` });
+  // Timer / session state
+  const [active, setActive] = useState<Exercise | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const [answer, setAnswer] = useState("");
+  const startedAt = useRef<number | null>(null);
+  const beeped = useRef(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("exercises" as any).select("*").order("created_at", { ascending: false });
+      setItems((data as any) || []);
+      setLoading(false);
+    })();
+
+    const channel = supabase
+      .channel("exercises-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "exercises" }, () => {
+        supabase.from("exercises" as any).select("*").order("created_at", { ascending: false })
+          .then(({ data }) => setItems((data as any) || []));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  useEffect(() => {
+    if (!active) return;
+    const i = setInterval(() => {
+      if (startedAt.current) setElapsed(Math.floor((Date.now() - startedAt.current) / 1000));
+    }, 250);
+    return () => clearInterval(i);
+  }, [active]);
+
+  const plannedSec = active ? active.duration * 60 : 0;
+  const remaining = Math.max(0, plannedSec - elapsed);
+  const overtime = active && elapsed > plannedSec;
+  const warn = !overtime && remaining <= 300 && remaining > 0;
+
+  useEffect(() => {
+    if (active && plannedSec > 0 && elapsed >= plannedSec && !beeped.current) {
+      beeped.current = true;
+      playBeep();
+      toast.warning("انتهى الوقت! اضغط إنهاء لإرسال إجابتك");
+    }
+  }, [elapsed, plannedSec, active]);
+
+  const subjects = useMemo(() => Array.from(new Set(items.map(i => i.subject))).sort(), [items]);
+  const filtered = items.filter(i =>
+    (subjectFilter === "all" || i.subject === subjectFilter) &&
+    (diffFilter === "all" || i.difficulty === diffFilter)
+  );
+
+  const start = (ex: Exercise) => {
+    setActive(ex); setElapsed(0); setAnswer(""); startedAt.current = Date.now(); beeped.current = false;
   };
+  const cancel = () => { setActive(null); setElapsed(0); setAnswer(""); startedAt.current = null; beeped.current = false; };
+  const submit = async () => {
+    if (!active) return;
+    const award = computeAward(active.points, active.duration, elapsed);
+    await addPoints(award);
+    toast.success(`أحسنت! +${award} نقطة 🎉`, { description: active.title });
+    cancel();
+  };
+
+  const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const timerColor = overtime ? "text-destructive" : warn ? "text-warning" : "text-primary";
 
   return (
     <div className="space-y-6 animate-fade-in pb-8">
@@ -49,51 +135,78 @@ export default function Exercises() {
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-        <FilterChip active={filter === "all"} onClick={() => setFilter("all")} label="الكل" emoji="📚" />
-        {(Object.keys(SUBJECT_META) as Subject[]).map(s => (
-          <FilterChip key={s} active={filter === s} onClick={() => setFilter(s)} label={SUBJECT_META[s].label} emoji={SUBJECT_META[s].emoji} />
-        ))}
+      <div className="grid grid-cols-2 gap-3">
+        <Select value={subjectFilter} onValueChange={setSubjectFilter}>
+          <SelectTrigger><SelectValue placeholder="المادة" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل المواد</SelectItem>
+            {subjects.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={diffFilter} onValueChange={setDiffFilter}>
+          <SelectTrigger><SelectValue placeholder="المستوى" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل المستويات</SelectItem>
+            {(["سهل", "متوسط", "صعب"] as const).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        {filtered.map(ex => {
-          const meta = SUBJECT_META[ex.subject];
-          return (
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div>
+      ) : filtered.length === 0 ? (
+        <Card className="p-8 text-center text-muted-foreground">لا توجد تمارين بعد. سيقوم الأستاذ أو الإدارة بإضافتها قريباً.</Card>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4">
+          {filtered.map(ex => (
             <Card key={ex.id} className="p-5 bg-gradient-card border-border/60 card-hover">
-              <div className="flex items-start gap-3 mb-3">
-                <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${meta.color} flex items-center justify-center text-2xl flex-shrink-0`}>
-                  {meta.emoji}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <Badge variant="secondary" className="text-[10px] font-bold mb-1">{meta.label}</Badge>
-                  <h3 className="font-display font-bold text-base leading-snug">{ex.title}</h3>
-                </div>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                <Badge variant="secondary" className="text-[10px] font-bold">{ex.subject}</Badge>
+                <Badge variant="outline" className={cn("text-[10px] font-bold", DIFF_COLORS[ex.difficulty])}>{ex.difficulty}</Badge>
               </div>
-              <div className="flex items-center gap-2 mb-4 text-xs">
-                <Badge variant="outline" className={cn("font-bold", DIFF_COLORS[ex.difficulty])}>{ex.difficulty}</Badge>
-                <span className="text-muted-foreground font-semibold">{ex.questions} سؤال</span>
-                <span className="text-muted-foreground">·</span>
+              <h3 className="font-display font-bold text-base leading-snug mb-2">{ex.title}</h3>
+              <div className="flex items-center gap-3 mb-4 text-xs">
+                <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" />{ex.duration}د</span>
                 <span className="font-bold text-warning flex items-center gap-1"><Zap className="h-3 w-3" />+{ex.points}</span>
               </div>
-              <Button onClick={() => handleStart(ex)} className="w-full bg-gradient-primary hover:opacity-95 gap-1">
+              <Button onClick={() => start(ex)} className="w-full bg-gradient-primary hover:opacity-95 gap-1">
                 ابدأ التمرين <ChevronLeft className="h-4 w-4" />
               </Button>
             </Card>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+          ))}
+        </div>
+      )}
 
-function FilterChip({ active, onClick, label, emoji }: { active: boolean; onClick: () => void; label: string; emoji: string }) {
-  return (
-    <button onClick={onClick} className={cn(
-      "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-smooth border",
-      active ? "bg-gradient-primary text-white border-transparent shadow-primary" : "bg-card text-muted-foreground border-border hover:border-primary/40"
-    )}>
-      <span>{emoji}</span> {label}
-    </button>
+      <Dialog open={!!active} onOpenChange={(o) => { if (!o) cancel(); }}>
+        <DialogContent className="max-h-[92vh] overflow-y-auto">
+          {active && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-display">{active.title}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className={cn("text-center font-display font-extrabold text-5xl tabular-nums", timerColor)}>
+                  {overtime ? `+${fmt(elapsed - plannedSec)}` : fmt(remaining)}
+                </div>
+                <p className="text-center text-xs text-muted-foreground">
+                  {overtime ? "وقت إضافي - النقاط تنقص كل 10 دقائق" : warn ? "تبقى أقل من 5 دقائق ⚠️" : `من أصل ${active.duration} دقيقة`}
+                </p>
+                {active.content && (
+                  <Card className="p-4 bg-muted/40 whitespace-pre-wrap text-sm">{active.content}</Card>
+                )}
+                <div>
+                  <label className="text-sm font-semibold mb-1 block">إجابتك</label>
+                  <Textarea value={answer} onChange={e => setAnswer(e.target.value)} rows={4} placeholder="اكتب إجابتك هنا..." />
+                </div>
+              </div>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={cancel} className="gap-1"><Square className="h-4 w-4" /> إلغاء</Button>
+                <Button onClick={submit} className="bg-gradient-primary hover:opacity-95 gap-1"><Check className="h-4 w-4" /> إنهاء وإرسال</Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
