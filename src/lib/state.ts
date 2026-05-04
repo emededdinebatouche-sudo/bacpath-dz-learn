@@ -43,22 +43,47 @@ export const useApp = () => {
   return ctx;
 };
 
-async function loadAppUser(supaUser: SupaUser): Promise<AppUser | null> {
-  const [{ data: profile }, { data: roleRow }] = await Promise.all([
-    supabase.from("profiles").select("full_name, points, level, streak, stream").eq("id", supaUser.id).maybeSingle(),
-    supabase.from("user_roles").select("role").eq("user_id", supaUser.id).maybeSingle(),
-  ]);
-  if (!roleRow) return null;
+function defaultUser(supaUser: SupaUser): AppUser {
+  const isAdmin = supaUser.email === "batoucheimad0@gmail.com";
   return {
     id: supaUser.id,
     email: supaUser.email ?? "",
-    name: profile?.full_name || supaUser.email?.split("@")[0] || "مستخدم",
-    role: roleRow.role as Role,
-    points: profile?.points ?? 0,
-    level: profile?.level ?? 1,
-    streak: profile?.streak ?? 0,
-    stream: profile?.stream ?? null,
+    name: supaUser.email?.split("@")[0] || "مستخدم",
+    role: isAdmin ? "admin" : "student",
+    points: 0,
+    level: 1,
+    streak: 0,
+    stream: null,
   };
+}
+
+async function loadAppUser(supaUser: SupaUser): Promise<AppUser> {
+  try {
+    const timeout = new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), 3000));
+    const fetchData = Promise.all([
+      supabase.from("profiles").select("full_name, points, level, streak, stream").eq("id", supaUser.id).maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", supaUser.id).maybeSingle(),
+    ]);
+    const result = await Promise.race([fetchData, timeout]);
+    if (result === "timeout") {
+      console.warn("Profile fetch timed out, using defaults");
+      return defaultUser(supaUser);
+    }
+    const [{ data: profile }, { data: roleRow }] = result;
+    const fallback = defaultUser(supaUser);
+    return {
+      ...fallback,
+      name: profile?.full_name || fallback.name,
+      role: (roleRow?.role as Role) || fallback.role,
+      points: profile?.points ?? 0,
+      level: profile?.level ?? 1,
+      streak: profile?.streak ?? 0,
+      stream: profile?.stream ?? null,
+    };
+  } catch (e) {
+    console.warn("loadAppUser error", e);
+    return defaultUser(supaUser);
+  }
 }
 
 export function useAppState() {
@@ -77,30 +102,26 @@ export function useAppState() {
   }, []);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+    const handle = (sess: Session | null) => {
       setSession(sess);
       if (sess?.user) {
-        const uid = sess.user.id;
+        // Show dashboard immediately with defaults
+        setUser(defaultUser(sess.user));
+        setLoading(false);
+        // Load real profile in background
         setTimeout(() => {
-          loadAppUser(sess.user).then(u => { setUser(u); setLoading(false); });
-          loadTasks(uid);
+          loadAppUser(sess.user).then(u => setUser(u));
+          loadTasks(sess.user.id);
         }, 0);
       } else {
         setUser(null);
         setTasks([]);
         setLoading(false);
       }
-    });
+    };
 
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
-      setSession(sess);
-      if (sess?.user) {
-        loadAppUser(sess.user).then(u => { setUser(u); setLoading(false); });
-        loadTasks(sess.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => handle(sess));
+    supabase.auth.getSession().then(({ data: { session: sess } }) => handle(sess));
 
     return () => sub.subscription.unsubscribe();
   }, [loadTasks]);
