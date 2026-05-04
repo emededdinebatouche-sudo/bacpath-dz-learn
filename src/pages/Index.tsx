@@ -37,11 +37,7 @@ const Index = () => {
   }
 
   if (!state.user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-      </div>
-    );
+    return null;
   }
 
   if (state.user.role === "admin") {
