@@ -14,6 +14,7 @@ import { Plus, BookOpen, Video, Users, GraduationCap, LogOut, TrendingUp, Calend
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import ExerciseManager from "@/components/exercises/ExerciseManager";
+import LiveSessionsManager from "@/components/live/LiveSessionsManager";
 
 const STUDENTS = [
   { name: "أمين الجزائري", points: 1280, level: 2, progress: 78 },
