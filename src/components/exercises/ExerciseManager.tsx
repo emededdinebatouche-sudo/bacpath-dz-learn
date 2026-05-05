@@ -43,12 +43,13 @@ export default function ExerciseManager() {
   const [subject, setSubject] = useState("");
   const [difficulty, setDifficulty] = useState<Exercise["difficulty"]>("متوسط");
   const [content, setContent] = useState("");
-  const [points, setPoints] = useState(30);
-  const [duration, setDuration] = useState(30);
+
+  const POINTS_BY_DIFF: Record<Exercise["difficulty"], number> = { "سهل": 20, "متوسط": 40, "صعب": 60 };
+  const DURATION_BY_DIFF: Record<Exercise["difficulty"], number> = { "سهل": 15, "متوسط": 30, "صعب": 45 };
 
   const reset = () => {
     setEditing(null);
-    setTitle(""); setSubject(""); setDifficulty("متوسط"); setContent(""); setPoints(30); setDuration(30);
+    setTitle(""); setSubject(""); setDifficulty("متوسط"); setContent("");
   };
 
   const load = async () => {
