@@ -14,6 +14,7 @@ import { Plus, BookOpen, Video, Users, GraduationCap, LogOut, TrendingUp, Calend
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import ExerciseManager from "@/components/exercises/ExerciseManager";
+import LiveSessionsManager from "@/components/live/LiveSessionsManager";
 
 const STUDENTS = [
   { name: "أمين الجزائري", points: 1280, level: 2, progress: 78 },
@@ -84,33 +85,7 @@ export default function TeacherDashboard() {
           </TabsContent>
 
           <TabsContent value="live" className="space-y-4 mt-5">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display font-bold text-lg">حصصي المجدولة</h2>
-              <Button onClick={() => toast.success("تمت جدولة حصة جديدة 📅")} className="bg-gradient-primary hover:opacity-95 gap-2 shadow-primary">
-                <Plus className="h-4 w-4" /> جدولة حصة
-              </Button>
-            </div>
-            {[
-              { title: "تصحيح بكالوريا 2024 — الرياضيات", time: "اليوم 19:00", subject: "math" as Subject },
-              { title: "حصة مراجعة الفصل الأول", time: "غداً 17:30", subject: "math" as Subject },
-              { title: "ورشة حل المسائل", time: "السبت 20:00", subject: "math" as Subject },
-            ].map((s, i) => {
-              const m = SUBJECT_META[s.subject];
-              return (
-                <Card key={i} className="p-4 bg-gradient-card border-border/60 card-hover">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${m.color} flex items-center justify-center`}>
-                      <Video className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-display font-bold text-sm">{s.title}</h3>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><Calendar className="h-3 w-3" /> {s.time}</p>
-                    </div>
-                    <Button size="sm" variant="outline">إدارة</Button>
-                  </div>
-                </Card>
-              );
-            })}
+            <LiveSessionsManager />
           </TabsContent>
 
           <TabsContent value="students" className="space-y-3 mt-5">

@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { GraduationCap, LogOut, Users, BookOpen, Compass, Video, Shield, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ExerciseManager from "@/components/exercises/ExerciseManager";
+import LiveSessionsManager from "@/components/live/LiveSessionsManager";
 
 type Profile = {
   id: string;
@@ -177,6 +178,8 @@ export default function AdminDashboard() {
             </div>
           ) : tab === "exercises" ? (
             <ExerciseManager />
+          ) : tab === "sessions" ? (
+            <LiveSessionsManager />
           ) : (
             <Card className="p-8 text-center space-y-2">
               <h2 className="text-xl font-display font-extrabold">قريباً</h2>
