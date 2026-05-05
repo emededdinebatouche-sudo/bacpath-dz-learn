@@ -3,11 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useApp } from "@/lib/state";
-import { BookOpen, Zap, ChevronLeft, Clock, Check, Square, Loader2 } from "lucide-react";
+import { BookOpen, Zap, ChevronLeft, Clock, Check, X, Eye, Square, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -17,6 +16,7 @@ type Exercise = {
   subject: string;
   difficulty: "سهل" | "متوسط" | "صعب";
   content: string;
+  solution: string;
   points: number;
   duration: number;
 };
@@ -42,14 +42,6 @@ function playBeep() {
   } catch {}
 }
 
-function computeAward(base: number, durationMin: number, elapsedSec: number) {
-  const planned = durationMin * 60;
-  if (elapsedSec < planned) return Math.round(base * 1.2);
-  if (elapsedSec === planned) return base;
-  const extraMin = Math.floor((elapsedSec - planned) / 60);
-  return Math.max(0, Math.round(base * Math.max(0, 1 - Math.floor(extraMin / 10) * 0.1)));
-}
-
 export default function Exercises() {
   const { addPoints } = useApp();
   const [items, setItems] = useState<Exercise[]>([]);
@@ -57,10 +49,9 @@ export default function Exercises() {
   const [subjectFilter, setSubjectFilter] = useState<string>("all");
   const [diffFilter, setDiffFilter] = useState<string>("all");
 
-  // Timer / session state
   const [active, setActive] = useState<Exercise | null>(null);
   const [elapsed, setElapsed] = useState(0);
-  const [answer, setAnswer] = useState("");
+  const [showSolution, setShowSolution] = useState(false);
   const startedAt = useRef<number | null>(null);
   const beeped = useRef(false);
 
@@ -91,14 +82,14 @@ export default function Exercises() {
 
   const plannedSec = active ? active.duration * 60 : 0;
   const remaining = Math.max(0, plannedSec - elapsed);
-  const overtime = active && elapsed > plannedSec;
+  const overtime = !!(active && elapsed > plannedSec);
   const warn = !overtime && remaining <= 300 && remaining > 0;
 
   useEffect(() => {
     if (active && plannedSec > 0 && elapsed >= plannedSec && !beeped.current) {
       beeped.current = true;
       playBeep();
-      toast.warning("انتهى الوقت! اضغط إنهاء لإرسال إجابتك");
+      toast.warning("انتهى الوقت!");
     }
   }, [elapsed, plannedSec, active]);
 
@@ -109,14 +100,22 @@ export default function Exercises() {
   );
 
   const start = (ex: Exercise) => {
-    setActive(ex); setElapsed(0); setAnswer(""); startedAt.current = Date.now(); beeped.current = false;
+    setActive(ex); setElapsed(0); setShowSolution(false);
+    startedAt.current = Date.now(); beeped.current = false;
   };
-  const cancel = () => { setActive(null); setElapsed(0); setAnswer(""); startedAt.current = null; beeped.current = false; };
-  const submit = async () => {
+  const cancel = () => {
+    setActive(null); setElapsed(0); setShowSolution(false);
+    startedAt.current = null; beeped.current = false;
+  };
+
+  const markCorrect = async () => {
     if (!active) return;
-    const award = computeAward(active.points, active.duration, elapsed);
-    await addPoints(award);
-    toast.success(`أحسنت! +${award} نقطة 🎉`, { description: active.title });
+    await addPoints(active.points);
+    toast.success(`أحسنت! +${active.points} نقطة 🎉`, { description: active.title });
+    cancel();
+  };
+  const markWrong = () => {
+    toast.info("لا بأس، يمكنك المحاولة لاحقاً 💪", { description: active?.title });
     cancel();
   };
 
@@ -189,19 +188,42 @@ export default function Exercises() {
                   {overtime ? `+${fmt(elapsed - plannedSec)}` : fmt(remaining)}
                 </div>
                 <p className="text-center text-xs text-muted-foreground">
-                  {overtime ? "وقت إضافي - النقاط تنقص كل 10 دقائق" : warn ? "تبقى أقل من 5 دقائق ⚠️" : `من أصل ${active.duration} دقيقة`}
+                  {overtime ? "وقت إضافي" : warn ? "تبقى أقل من 5 دقائق ⚠️" : `من أصل ${active.duration} دقيقة`}
                 </p>
                 {active.content && (
                   <Card className="p-4 bg-muted/40 whitespace-pre-wrap text-sm">{active.content}</Card>
                 )}
-                <div>
-                  <label className="text-sm font-semibold mb-1 block">إجابتك</label>
-                  <Textarea value={answer} onChange={e => setAnswer(e.target.value)} rows={4} placeholder="اكتب إجابتك هنا..." />
-                </div>
+                <p className="text-center text-sm text-muted-foreground">
+                  ✍️ حل التمرين على ورقة، ثم اطلع على الحل النموذجي
+                </p>
+
+                {showSolution && (
+                  <Card className="p-4 bg-success/10 border-success/30 whitespace-pre-wrap text-sm">
+                    <div className="font-bold text-success mb-2 flex items-center gap-1">
+                      <Check className="h-4 w-4" /> الحل النموذجي
+                    </div>
+                    {active.solution || "لم يتم إضافة حل لهذا التمرين."}
+                  </Card>
+                )}
               </div>
-              <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={cancel} className="gap-1"><Square className="h-4 w-4" /> إلغاء</Button>
-                <Button onClick={submit} className="bg-gradient-primary hover:opacity-95 gap-1"><Check className="h-4 w-4" /> إنهاء وإرسال</Button>
+              <DialogFooter className="gap-2 flex-col sm:flex-row">
+                {!showSolution ? (
+                  <>
+                    <Button variant="outline" onClick={cancel} className="gap-1"><Square className="h-4 w-4" /> إلغاء</Button>
+                    <Button onClick={() => setShowSolution(true)} className="bg-gradient-primary hover:opacity-95 gap-1">
+                      <Eye className="h-4 w-4" /> اطلع على الحل
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" onClick={markWrong} className="gap-1 border-destructive/40 text-destructive hover:bg-destructive/10">
+                      <X className="h-4 w-4" /> أجبت خطأ
+                    </Button>
+                    <Button onClick={markCorrect} className="bg-success hover:bg-success/90 text-white gap-1">
+                      <Check className="h-4 w-4" /> أجبت صح (+{active.points})
+                    </Button>
+                  </>
+                )}
               </DialogFooter>
             </>
           )}
