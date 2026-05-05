@@ -43,12 +43,13 @@ export default function ExerciseManager() {
   const [subject, setSubject] = useState("");
   const [difficulty, setDifficulty] = useState<Exercise["difficulty"]>("متوسط");
   const [content, setContent] = useState("");
-  const [points, setPoints] = useState(30);
-  const [duration, setDuration] = useState(30);
+
+  const POINTS_BY_DIFF: Record<Exercise["difficulty"], number> = { "سهل": 20, "متوسط": 40, "صعب": 60 };
+  const DURATION_BY_DIFF: Record<Exercise["difficulty"], number> = { "سهل": 15, "متوسط": 30, "صعب": 45 };
 
   const reset = () => {
     setEditing(null);
-    setTitle(""); setSubject(""); setDifficulty("متوسط"); setContent(""); setPoints(30); setDuration(30);
+    setTitle(""); setSubject(""); setDifficulty("متوسط"); setContent("");
   };
 
   const load = async () => {
@@ -63,7 +64,7 @@ export default function ExerciseManager() {
   const openEdit = (ex: Exercise) => {
     setEditing(ex);
     setTitle(ex.title); setSubject(ex.subject); setDifficulty(ex.difficulty);
-    setContent(ex.content); setPoints(ex.points); setDuration(ex.duration);
+    setContent(ex.content);
     setOpen(true);
   };
 
@@ -71,6 +72,9 @@ export default function ExerciseManager() {
     e.preventDefault();
     if (!user) return;
     if (!title.trim() || !subject.trim()) { toast.error("العنوان والمادة مطلوبان"); return; }
+
+    const points = POINTS_BY_DIFF[difficulty];
+    const duration = DURATION_BY_DIFF[difficulty];
 
     if (editing) {
       const { error } = await supabase.from("exercises" as any).update({
@@ -132,16 +136,9 @@ export default function ExerciseManager() {
                 <Label>محتوى التمرين / السؤال</Label>
                 <Textarea value={content} onChange={e => setContent(e.target.value)} rows={5} placeholder="اكتب نص التمرين أو السؤال..." />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>النقاط</Label>
-                  <Input type="number" min={1} max={500} value={points} onChange={e => setPoints(Number(e.target.value))} />
-                </div>
-                <div>
-                  <Label>المدة (دقيقة)</Label>
-                  <Input type="number" min={1} max={300} value={duration} onChange={e => setDuration(Number(e.target.value))} />
-                </div>
-              </div>
+              <p className="text-xs text-muted-foreground">
+                النقاط والمدة تُحسب تلقائياً: سهل = 20 نقطة (15د) • متوسط = 40 نقطة (30د) • صعب = 60 نقطة (45د)
+              </p>
               <DialogFooter>
                 <Button type="submit" className="w-full bg-gradient-primary hover:opacity-95">{editing ? "حفظ التغييرات" : "إضافة"}</Button>
               </DialogFooter>
