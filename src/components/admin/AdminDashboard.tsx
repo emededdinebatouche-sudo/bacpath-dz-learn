@@ -178,6 +178,8 @@ export default function AdminDashboard() {
             </div>
           ) : tab === "exercises" ? (
             <ExerciseManager />
+          ) : tab === "sessions" ? (
+            <LiveSessionsManager />
           ) : (
             <Card className="p-8 text-center space-y-2">
               <h2 className="text-xl font-display font-extrabold">قريباً</h2>
