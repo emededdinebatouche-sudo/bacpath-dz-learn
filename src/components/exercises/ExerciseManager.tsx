@@ -20,6 +20,7 @@ export type Exercise = {
   subject: string;
   difficulty: "سهل" | "متوسط" | "صعب";
   content: string;
+  solution: string;
   points: number;
   duration: number;
   created_at: string;
@@ -43,13 +44,14 @@ export default function ExerciseManager() {
   const [subject, setSubject] = useState("");
   const [difficulty, setDifficulty] = useState<Exercise["difficulty"]>("متوسط");
   const [content, setContent] = useState("");
+  const [solution, setSolution] = useState("");
 
   const POINTS_BY_DIFF: Record<Exercise["difficulty"], number> = { "سهل": 20, "متوسط": 40, "صعب": 60 };
   const DURATION_BY_DIFF: Record<Exercise["difficulty"], number> = { "سهل": 15, "متوسط": 30, "صعب": 45 };
 
   const reset = () => {
     setEditing(null);
-    setTitle(""); setSubject(""); setDifficulty("متوسط"); setContent("");
+    setTitle(""); setSubject(""); setDifficulty("متوسط"); setContent(""); setSolution("");
   };
 
   const load = async () => {
@@ -64,7 +66,7 @@ export default function ExerciseManager() {
   const openEdit = (ex: Exercise) => {
     setEditing(ex);
     setTitle(ex.title); setSubject(ex.subject); setDifficulty(ex.difficulty);
-    setContent(ex.content);
+    setContent(ex.content); setSolution(ex.solution || "");
     setOpen(true);
   };
 
@@ -78,13 +80,13 @@ export default function ExerciseManager() {
 
     if (editing) {
       const { error } = await supabase.from("exercises" as any).update({
-        title: title.trim(), subject: subject.trim(), difficulty, content, points, duration,
+        title: title.trim(), subject: subject.trim(), difficulty, content, solution, points, duration,
       }).eq("id", editing.id);
       if (error) { toast.error(error.message); return; }
       toast.success("تم تحديث التمرين");
     } else {
       const { error } = await supabase.from("exercises" as any).insert({
-        created_by: user.id, title: title.trim(), subject: subject.trim(), difficulty, content, points, duration,
+        created_by: user.id, title: title.trim(), subject: subject.trim(), difficulty, content, solution, points, duration,
       });
       if (error) { toast.error(error.message); return; }
       toast.success("تمت إضافة التمرين");
@@ -135,6 +137,10 @@ export default function ExerciseManager() {
               <div>
                 <Label>محتوى التمرين / السؤال</Label>
                 <Textarea value={content} onChange={e => setContent(e.target.value)} rows={5} placeholder="اكتب نص التمرين أو السؤال..." />
+              </div>
+              <div>
+                <Label>الحل النموذجي</Label>
+                <Textarea value={solution} onChange={e => setSolution(e.target.value)} rows={5} placeholder="اكتب الحل الذي سيراه التلميذ بعد المحاولة..." required />
               </div>
               <p className="text-xs text-muted-foreground">
                 النقاط والمدة تُحسب تلقائياً: سهل = 20 نقطة (15د) • متوسط = 40 نقطة (30د) • صعب = 60 نقطة (45د)
