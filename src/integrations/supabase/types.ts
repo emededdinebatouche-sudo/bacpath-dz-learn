@@ -23,6 +23,7 @@ export type Database = {
           duration: number
           id: string
           points: number
+          solution: string
           subject: string
           title: string
           updated_at: string
@@ -35,6 +36,7 @@ export type Database = {
           duration?: number
           id?: string
           points?: number
+          solution?: string
           subject: string
           title: string
           updated_at?: string
@@ -47,6 +49,7 @@ export type Database = {
           duration?: number
           id?: string
           points?: number
+          solution?: string
           subject?: string
           title?: string
           updated_at?: string
