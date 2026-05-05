@@ -73,6 +73,9 @@ export default function ExerciseManager() {
     if (!user) return;
     if (!title.trim() || !subject.trim()) { toast.error("العنوان والمادة مطلوبان"); return; }
 
+    const points = POINTS_BY_DIFF[difficulty];
+    const duration = DURATION_BY_DIFF[difficulty];
+
     if (editing) {
       const { error } = await supabase.from("exercises" as any).update({
         title: title.trim(), subject: subject.trim(), difficulty, content, points, duration,
