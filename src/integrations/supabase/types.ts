@@ -56,6 +56,89 @@ export type Database = {
         }
         Relationships: []
       }
+      live_questions: {
+        Row: {
+          answer: string | null
+          answered_by: string | null
+          answered_by_name: string | null
+          created_at: string
+          id: string
+          question: string
+          session_id: string
+          updated_at: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          answer?: string | null
+          answered_by?: string | null
+          answered_by_name?: string | null
+          created_at?: string
+          id?: string
+          question: string
+          session_id: string
+          updated_at?: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          answer?: string | null
+          answered_by?: string | null
+          answered_by_name?: string | null
+          created_at?: string
+          id?: string
+          question?: string
+          session_id?: string
+          updated_at?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_questions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_sessions: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          scheduled_at: string
+          status: string
+          stream_link: string
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          scheduled_at: string
+          status?: string
+          stream_link: string
+          subject: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          scheduled_at?: string
+          status?: string
+          stream_link?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
