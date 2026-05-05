@@ -136,16 +136,9 @@ export default function ExerciseManager() {
                 <Label>محتوى التمرين / السؤال</Label>
                 <Textarea value={content} onChange={e => setContent(e.target.value)} rows={5} placeholder="اكتب نص التمرين أو السؤال..." />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>النقاط</Label>
-                  <Input type="number" min={1} max={500} value={points} onChange={e => setPoints(Number(e.target.value))} />
-                </div>
-                <div>
-                  <Label>المدة (دقيقة)</Label>
-                  <Input type="number" min={1} max={300} value={duration} onChange={e => setDuration(Number(e.target.value))} />
-                </div>
-              </div>
+              <p className="text-xs text-muted-foreground">
+                النقاط والمدة تُحسب تلقائياً: سهل = 20 نقطة (15د) • متوسط = 40 نقطة (30د) • صعب = 60 نقطة (45د)
+              </p>
               <DialogFooter>
                 <Button type="submit" className="w-full bg-gradient-primary hover:opacity-95">{editing ? "حفظ التغييرات" : "إضافة"}</Button>
               </DialogFooter>
