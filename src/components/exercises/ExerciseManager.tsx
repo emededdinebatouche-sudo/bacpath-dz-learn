@@ -64,7 +64,7 @@ export default function ExerciseManager() {
   const openEdit = (ex: Exercise) => {
     setEditing(ex);
     setTitle(ex.title); setSubject(ex.subject); setDifficulty(ex.difficulty);
-    setContent(ex.content); setPoints(ex.points); setDuration(ex.duration);
+    setContent(ex.content);
     setOpen(true);
   };
 
