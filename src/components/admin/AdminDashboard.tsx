@@ -36,7 +36,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     (async () => {
       const [{ data: p }, { data: r }, { data: t }] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, points, level, streak, stream"),
+        supabase.from("profiles").select("id, full_name, points, level, streak, stream, teacher_subject"),
         supabase.from("user_roles").select("user_id, role"),
         supabase.from("tasks" as any).select("id, user_id, title, done, points"),
       ]);
