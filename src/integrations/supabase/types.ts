@@ -172,6 +172,45 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_questions: {
+        Row: {
+          answer: string | null
+          answered_by: string | null
+          answered_by_name: string | null
+          created_at: string
+          id: string
+          question: string
+          subject: string
+          updated_at: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          answer?: string | null
+          answered_by?: string | null
+          answered_by_name?: string | null
+          created_at?: string
+          id?: string
+          question: string
+          subject: string
+          updated_at?: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          answer?: string | null
+          answered_by?: string | null
+          answered_by_name?: string | null
+          created_at?: string
+          id?: string
+          question?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           created_at: string

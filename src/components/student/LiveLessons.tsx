@@ -3,11 +3,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Video, Calendar, ExternalLink, Send, MessageSquare, CheckCircle2, Circle } from "lucide-react";
+import { Video, Calendar, ExternalLink, Send, MessageSquare, CheckCircle2, Circle, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/lib/state";
 import { toast } from "sonner";
 import { getSessionState, type LiveSession } from "@/components/live/LiveSessionsManager";
+import QABoard from "@/components/live/QABoard";
 
 type Question = {
   id: string;
@@ -150,6 +151,13 @@ export default function LiveLessons() {
             </SessionCard>
           ))}
         </div>
+      </section>
+
+      <section>
+        <h2 className="font-display font-bold text-lg mb-3 flex items-center gap-2">
+          <HelpCircle className="h-5 w-5 text-primary" /> اسأل أي وقت
+        </h2>
+        <QABoard />
       </section>
     </div>
   );
