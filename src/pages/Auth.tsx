@@ -47,6 +47,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"student" | "teacher">("student");
   const [stream, setStream] = useState<string>("sciences");
+  const [teacherSubject, setTeacherSubject] = useState<string>("");
 
   const redirectFor = async (email: string | undefined, userId: string) => {
     if (email === "batoucheimad0@gmail.com") return "/admin";
