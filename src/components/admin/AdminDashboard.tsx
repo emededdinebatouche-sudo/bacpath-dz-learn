@@ -200,3 +200,30 @@ function StatCard({ label, value }: { label: string; value: number }) {
     </Card>
   );
 }
+
+function TeacherRow({ teacher, onSaved }: { teacher: Profile; onSaved: (subj: string) => void }) {
+  const [subj, setSubj] = useState(teacher.teacher_subject || "");
+  const [saving, setSaving] = useState(false);
+  const dirty = (teacher.teacher_subject || "") !== subj;
+  const save = async () => {
+    setSaving(true);
+    const { error } = await supabase.from("profiles").update({ teacher_subject: subj.trim() || null }).eq("id", teacher.id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("تم الحفظ");
+    onSaved(subj.trim());
+  };
+  return (
+    <Card className="p-4 flex items-center gap-3 flex-wrap">
+      <Avatar><AvatarFallback className="bg-gradient-primary text-white">{teacher.full_name.slice(0,2) || "أ"}</AvatarFallback></Avatar>
+      <div className="flex-1 min-w-[140px]">
+        <div className="font-bold">{teacher.full_name || "بدون اسم"}</div>
+        <div className="text-xs text-muted-foreground">المادة: {teacher.teacher_subject || "—"}</div>
+      </div>
+      <Input value={subj} onChange={e => setSubj(e.target.value)} placeholder="مادة الأستاذ" className="h-9 w-40" />
+      <Button size="sm" onClick={save} disabled={!dirty || saving} className="bg-gradient-primary gap-1">
+        <Save className="h-4 w-4" /> حفظ
+      </Button>
+    </Card>
+  );
+}
