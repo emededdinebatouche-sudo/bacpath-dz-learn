@@ -70,7 +70,11 @@ export default function AuthPage() {
     setSubmitting(true);
     try {
       if (mode === "signup") {
-        const parsed = signupSchema.safeParse({ fullName, email, password, role, stream: role === "student" ? stream : undefined });
+        const parsed = signupSchema.safeParse({
+          fullName, email, password, role,
+          stream: role === "student" ? stream : undefined,
+          teacherSubject: role === "teacher" ? teacherSubject : undefined,
+        });
         if (!parsed.success) {
           toast({ title: "خطأ", description: parsed.error.issues[0].message, variant: "destructive" });
           return;
@@ -84,6 +88,7 @@ export default function AuthPage() {
               full_name: parsed.data.fullName,
               role: parsed.data.role,
               stream: parsed.data.stream,
+              teacher_subject: parsed.data.teacherSubject,
             },
           },
         });
