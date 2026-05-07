@@ -173,10 +173,7 @@ export default function AdminDashboard() {
               <h2 className="text-2xl font-display font-extrabold">الأساتذة</h2>
               {teachers.length === 0 && <p className="text-muted-foreground">لا يوجد أساتذة بعد.</p>}
               {teachers.map(t => (
-                <Card key={t.id} className="p-4 flex items-center gap-4">
-                  <Avatar><AvatarFallback className="bg-gradient-primary text-white">{t.full_name.slice(0,2) || "أ"}</AvatarFallback></Avatar>
-                  <div className="flex-1"><div className="font-bold">{t.full_name || "بدون اسم"}</div></div>
-                </Card>
+                <TeacherRow key={t.id} teacher={t} onSaved={(subj) => setProfiles(prev => prev.map(p => p.id === t.id ? { ...p, teacher_subject: subj } : p))} />
               ))}
             </div>
           ) : tab === "exercises" ? (
