@@ -190,6 +190,13 @@ export default function AuthPage() {
                   </Select>
                 </div>
               )}
+
+              {role === "teacher" && (
+                <div>
+                  <Label htmlFor="tsubj" className="text-sm">المادة التي تدرّسها</Label>
+                  <Input id="tsubj" value={teacherSubject} onChange={e => setTeacherSubject(e.target.value)} placeholder="مثال: رياضيات، فيزياء..." className="h-11" />
+                </div>
+              )}
             </>
           )}
 
