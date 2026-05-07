@@ -16,6 +16,7 @@ type Profile = {
   level: number;
   streak: number;
   stream: string | null;
+  teacher_subject: string | null;
 };
 
 type RoleRow = { user_id: string; role: "student" | "teacher" | "admin" };
