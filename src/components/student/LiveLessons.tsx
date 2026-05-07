@@ -3,11 +3,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Video, Calendar, ExternalLink, Send, MessageSquare, CheckCircle2, Circle } from "lucide-react";
+import { Video, Calendar, ExternalLink, Send, MessageSquare, CheckCircle2, Circle, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/lib/state";
 import { toast } from "sonner";
 import { getSessionState, type LiveSession } from "@/components/live/LiveSessionsManager";
+import QABoard from "@/components/live/QABoard";
 
 type Question = {
   id: string;
