@@ -27,6 +27,10 @@ const signupSchema = z.object({
   password: z.string().min(6, "كلمة المرور 6 أحرف على الأقل").max(72),
   role: z.enum(["student", "teacher"]),
   stream: z.string().optional(),
+  teacherSubject: z.string().optional(),
+}).refine(d => d.role !== "teacher" || (d.teacherSubject && d.teacherSubject.trim().length >= 2), {
+  message: "أدخل المادة التي تدرّسها",
+  path: ["teacherSubject"],
 });
 
 const loginSchema = z.object({
