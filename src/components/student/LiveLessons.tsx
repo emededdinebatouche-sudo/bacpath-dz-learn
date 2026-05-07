@@ -152,6 +152,13 @@ export default function LiveLessons() {
           ))}
         </div>
       </section>
+
+      <section>
+        <h2 className="font-display font-bold text-lg mb-3 flex items-center gap-2">
+          <HelpCircle className="h-5 w-5 text-primary" /> اسأل أي وقت
+        </h2>
+        <QABoard />
+      </section>
     </div>
   );
 }
