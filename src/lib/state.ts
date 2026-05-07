@@ -22,6 +22,7 @@ export type AppUser = {
   level: number;
   streak: number;
   stream?: string | null;
+  teacherSubject?: string | null;
 };
 
 export type Task = {
@@ -61,7 +62,7 @@ async function loadAppUser(supaUser: SupaUser): Promise<AppUser> {
   try {
     const timeout = new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), 3000));
     const fetchData = Promise.all([
-      supabase.from("profiles").select("full_name, points, level, streak, stream").eq("id", supaUser.id).maybeSingle(),
+      supabase.from("profiles").select("full_name, points, level, streak, stream, teacher_subject").eq("id", supaUser.id).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", supaUser.id).maybeSingle(),
     ]);
     const result = await Promise.race([fetchData, timeout]);
@@ -79,6 +80,7 @@ async function loadAppUser(supaUser: SupaUser): Promise<AppUser> {
       level: profile?.level ?? 1,
       streak: profile?.streak ?? 0,
       stream: profile?.stream ?? null,
+      teacherSubject: (profile as any)?.teacher_subject ?? null,
     };
   } catch (e) {
     console.warn("loadAppUser error", e);

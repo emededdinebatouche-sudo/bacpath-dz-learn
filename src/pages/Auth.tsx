@@ -27,6 +27,10 @@ const signupSchema = z.object({
   password: z.string().min(6, "كلمة المرور 6 أحرف على الأقل").max(72),
   role: z.enum(["student", "teacher"]),
   stream: z.string().optional(),
+  teacherSubject: z.string().optional(),
+}).refine(d => d.role !== "teacher" || (d.teacherSubject && d.teacherSubject.trim().length >= 2), {
+  message: "أدخل المادة التي تدرّسها",
+  path: ["teacherSubject"],
 });
 
 const loginSchema = z.object({
@@ -43,6 +47,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"student" | "teacher">("student");
   const [stream, setStream] = useState<string>("sciences");
+  const [teacherSubject, setTeacherSubject] = useState<string>("");
 
   const redirectFor = async (email: string | undefined, userId: string) => {
     if (email === "batoucheimad0@gmail.com") return "/admin";
@@ -65,7 +70,11 @@ export default function AuthPage() {
     setSubmitting(true);
     try {
       if (mode === "signup") {
-        const parsed = signupSchema.safeParse({ fullName, email, password, role, stream: role === "student" ? stream : undefined });
+        const parsed = signupSchema.safeParse({
+          fullName, email, password, role,
+          stream: role === "student" ? stream : undefined,
+          teacherSubject: role === "teacher" ? teacherSubject : undefined,
+        });
         if (!parsed.success) {
           toast({ title: "خطأ", description: parsed.error.issues[0].message, variant: "destructive" });
           return;
@@ -79,6 +88,7 @@ export default function AuthPage() {
               full_name: parsed.data.fullName,
               role: parsed.data.role,
               stream: parsed.data.stream,
+              teacher_subject: parsed.data.teacherSubject,
             },
           },
         });
@@ -178,6 +188,13 @@ export default function AuthPage() {
                       {STREAMS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                </div>
+              )}
+
+              {role === "teacher" && (
+                <div>
+                  <Label htmlFor="tsubj" className="text-sm">المادة التي تدرّسها</Label>
+                  <Input id="tsubj" value={teacherSubject} onChange={e => setTeacherSubject(e.target.value)} placeholder="مثال: رياضيات، فيزياء..." className="h-11" />
                 </div>
               )}
             </>

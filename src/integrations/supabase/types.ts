@@ -148,6 +148,7 @@ export type Database = {
           points: number
           streak: number
           stream: Database["public"]["Enums"]["stream"] | null
+          teacher_subject: string | null
           updated_at: string
         }
         Insert: {
@@ -158,6 +159,7 @@ export type Database = {
           points?: number
           streak?: number
           stream?: Database["public"]["Enums"]["stream"] | null
+          teacher_subject?: string | null
           updated_at?: string
         }
         Update: {
@@ -168,6 +170,7 @@ export type Database = {
           points?: number
           streak?: number
           stream?: Database["public"]["Enums"]["stream"] | null
+          teacher_subject?: string | null
           updated_at?: string
         }
         Relationships: []

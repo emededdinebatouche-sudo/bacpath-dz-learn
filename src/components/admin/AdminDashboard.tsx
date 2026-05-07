@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApp } from "@/lib/state";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, LogOut, Users, BookOpen, Compass, Video, Shield, Loader2 } from "lucide-react";
+import { GraduationCap, LogOut, Users, BookOpen, Compass, Video, Shield, Loader2, Save } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import ExerciseManager from "@/components/exercises/ExerciseManager";
 import LiveSessionsManager from "@/components/live/LiveSessionsManager";
@@ -16,6 +18,7 @@ type Profile = {
   level: number;
   streak: number;
   stream: string | null;
+  teacher_subject: string | null;
 };
 
 type RoleRow = { user_id: string; role: "student" | "teacher" | "admin" };
@@ -35,7 +38,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     (async () => {
       const [{ data: p }, { data: r }, { data: t }] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, points, level, streak, stream"),
+        supabase.from("profiles").select("id, full_name, points, level, streak, stream, teacher_subject"),
         supabase.from("user_roles").select("user_id, role"),
         supabase.from("tasks" as any).select("id, user_id, title, done, points"),
       ]);
@@ -170,10 +173,7 @@ export default function AdminDashboard() {
               <h2 className="text-2xl font-display font-extrabold">الأساتذة</h2>
               {teachers.length === 0 && <p className="text-muted-foreground">لا يوجد أساتذة بعد.</p>}
               {teachers.map(t => (
-                <Card key={t.id} className="p-4 flex items-center gap-4">
-                  <Avatar><AvatarFallback className="bg-gradient-primary text-white">{t.full_name.slice(0,2) || "أ"}</AvatarFallback></Avatar>
-                  <div className="flex-1"><div className="font-bold">{t.full_name || "بدون اسم"}</div></div>
-                </Card>
+                <TeacherRow key={t.id} teacher={t} onSaved={(subj) => setProfiles(prev => prev.map(p => p.id === t.id ? { ...p, teacher_subject: subj } : p))} />
               ))}
             </div>
           ) : tab === "exercises" ? (
@@ -197,6 +197,33 @@ function StatCard({ label, value }: { label: string; value: number }) {
     <Card className="p-5">
       <div className="text-sm text-muted-foreground">{label}</div>
       <div className="text-3xl font-extrabold text-gradient mt-1">{value}</div>
+    </Card>
+  );
+}
+
+function TeacherRow({ teacher, onSaved }: { teacher: Profile; onSaved: (subj: string) => void }) {
+  const [subj, setSubj] = useState(teacher.teacher_subject || "");
+  const [saving, setSaving] = useState(false);
+  const dirty = (teacher.teacher_subject || "") !== subj;
+  const save = async () => {
+    setSaving(true);
+    const { error } = await supabase.from("profiles").update({ teacher_subject: subj.trim() || null }).eq("id", teacher.id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("تم الحفظ");
+    onSaved(subj.trim());
+  };
+  return (
+    <Card className="p-4 flex items-center gap-3 flex-wrap">
+      <Avatar><AvatarFallback className="bg-gradient-primary text-white">{teacher.full_name.slice(0,2) || "أ"}</AvatarFallback></Avatar>
+      <div className="flex-1 min-w-[140px]">
+        <div className="font-bold">{teacher.full_name || "بدون اسم"}</div>
+        <div className="text-xs text-muted-foreground">المادة: {teacher.teacher_subject || "—"}</div>
+      </div>
+      <Input value={subj} onChange={e => setSubj(e.target.value)} placeholder="مادة الأستاذ" className="h-9 w-40" />
+      <Button size="sm" onClick={save} disabled={!dirty || saving} className="bg-gradient-primary gap-1">
+        <Save className="h-4 w-4" /> حفظ
+      </Button>
     </Card>
   );
 }
