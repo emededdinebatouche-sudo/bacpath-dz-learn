@@ -22,6 +22,7 @@ export type AppUser = {
   level: number;
   streak: number;
   stream?: string | null;
+  teacherSubject?: string | null;
 };
 
 export type Task = {
