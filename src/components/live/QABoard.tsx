@@ -104,50 +104,66 @@ export default function QABoard() {
         {items.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-6">لا توجد أسئلة بعد. كن أول من يسأل!</p>
         )}
-        {items.map(q => (
-          <Card key={q.id} className="p-3 bg-card/50">
-            <div className="flex items-start gap-2">
-              {q.answer
-                ? <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-                : <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <Badge variant="secondary" className="text-[10px]">{q.subject}</Badge>
+        {(() => {
+          const norm = (s: string) => (s || "").trim().toLowerCase();
+          const ts = user?.role === "teacher" ? norm(user.teacherSubject || "") : "";
+          const sorted = ts
+            ? [...items].sort((a, b) => {
+                const am = norm(a.subject) === ts ? 0 : 1;
+                const bm = norm(b.subject) === ts ? 0 : 1;
+                if (am !== bm) return am - bm;
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+              })
+            : items;
+          return sorted.map(q => {
+            const matches = !!ts && norm(q.subject) === ts;
+            return (
+              <Card key={q.id} className={`p-3 ${matches ? "bg-primary/5 border-primary/40 ring-1 ring-primary/30" : "bg-card/50"}`}>
+                <div className="flex items-start gap-2">
                   {q.answer
-                    ? <Badge className="bg-primary text-primary-foreground text-[10px]">تمت الإجابة</Badge>
-                    : <Badge variant="outline" className="text-[10px]">في الانتظار</Badge>}
-                  <span className="text-[10px] text-muted-foreground">
-                    {new Date(q.created_at).toLocaleString("ar-DZ")}
-                  </span>
+                    ? <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                    : <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <Badge variant="secondary" className="text-[10px]">{q.subject}</Badge>
+                      {matches && <Badge className="bg-gradient-primary text-white text-[10px]">سؤال في مادتك</Badge>}
+                      {q.answer
+                        ? <Badge className="bg-primary text-primary-foreground text-[10px]">تمت الإجابة</Badge>
+                        : <Badge variant="outline" className="text-[10px]">في الانتظار</Badge>}
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(q.created_at).toLocaleString("ar-DZ")}
+                      </span>
+                    </div>
+                    <p className="text-sm"><span className="font-bold">{q.user_name || "طالب"}:</span> {q.question}</p>
+                    {q.answer && (
+                      <div className="mt-2 ps-3 border-s-2 border-primary">
+                        <p className="text-xs text-muted-foreground font-bold">{q.answered_by_name || "الأستاذ"} رد:</p>
+                        <p className="text-sm">{q.answer}</p>
+                      </div>
+                    )}
+                    {isStaff && !q.answer && (
+                      <div className="flex gap-2 mt-2">
+                        <Input
+                          value={aInput[q.id] || ""}
+                          onChange={(e) => setAInput({ ...aInput, [q.id]: e.target.value })}
+                          placeholder="اكتب الرد..."
+                          className="h-8 text-sm"
+                          onKeyDown={(e) => { if (e.key === "Enter") reply(q); }}
+                        />
+                        <Button size="sm" onClick={() => reply(q)} className="bg-gradient-primary">رد</Button>
+                      </div>
+                    )}
+                  </div>
+                  {(user?.id === q.user_id || user?.role === "admin") && (
+                    <Button size="icon" variant="ghost" onClick={() => remove(q.id)} className="h-7 w-7">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                 </div>
-                <p className="text-sm"><span className="font-bold">{q.user_name || "طالب"}:</span> {q.question}</p>
-                {q.answer && (
-                  <div className="mt-2 ps-3 border-s-2 border-primary">
-                    <p className="text-xs text-muted-foreground font-bold">{q.answered_by_name || "الأستاذ"} رد:</p>
-                    <p className="text-sm">{q.answer}</p>
-                  </div>
-                )}
-                {isStaff && !q.answer && (
-                  <div className="flex gap-2 mt-2">
-                    <Input
-                      value={aInput[q.id] || ""}
-                      onChange={(e) => setAInput({ ...aInput, [q.id]: e.target.value })}
-                      placeholder="اكتب الرد..."
-                      className="h-8 text-sm"
-                      onKeyDown={(e) => { if (e.key === "Enter") reply(q); }}
-                    />
-                    <Button size="sm" onClick={() => reply(q)} className="bg-gradient-primary">رد</Button>
-                  </div>
-                )}
-              </div>
-              {(user?.id === q.user_id || user?.role === "admin") && (
-                <Button size="icon" variant="ghost" onClick={() => remove(q.id)} className="h-7 w-7">
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              )}
-            </div>
-          </Card>
-        ))}
+              </Card>
+            );
+          });
+        })()}
       </div>
     </div>
   );
