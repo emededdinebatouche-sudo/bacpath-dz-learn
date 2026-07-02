@@ -9,6 +9,7 @@ import { useApp } from "@/lib/state";
 import { BookOpen, Zap, ChevronLeft, Clock, Check, X, Eye, Square, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import PastExams from "@/components/student/PastExams";
 
 type Exercise = {
   id: string;
