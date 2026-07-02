@@ -229,6 +229,11 @@ export default function Exercises() {
           )}
         </DialogContent>
       </Dialog>
+
+      <div className="pt-4 border-t border-border/60">
+        <PastExams />
+      </div>
     </div>
   );
 }
+
