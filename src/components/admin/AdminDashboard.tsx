@@ -60,6 +60,7 @@ export default function AdminDashboard() {
     { id: "students", label: "الطلاب", icon: Users },
     { id: "teachers", label: "الأساتذة", icon: GraduationCap },
     { id: "exercises", label: "التمارين", icon: BookOpen },
+    { id: "exams", label: "بكالوريات سابقة", icon: FileText },
     { id: "guide", label: "دليلي", icon: Compass },
     { id: "sessions", label: "الحصص المباشرة", icon: Video },
   ];
