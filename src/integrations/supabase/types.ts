@@ -139,6 +139,51 @@ export type Database = {
         }
         Relationships: []
       }
+      past_exams: {
+        Row: {
+          branch: string
+          created_at: string
+          created_by: string
+          duration: number
+          exam_path: string
+          id: string
+          points: number
+          solution_path: string | null
+          subject: string
+          title: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          branch: string
+          created_at?: string
+          created_by: string
+          duration?: number
+          exam_path: string
+          id?: string
+          points?: number
+          solution_path?: string | null
+          subject: string
+          title?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          branch?: string
+          created_at?: string
+          created_by?: string
+          duration?: number
+          exam_path?: string
+          id?: string
+          points?: number
+          solution_path?: string | null
+          subject?: string
+          title?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
