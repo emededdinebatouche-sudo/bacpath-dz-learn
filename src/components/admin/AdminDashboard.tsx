@@ -26,7 +26,7 @@ type RoleRow = { user_id: string; role: "student" | "teacher" | "admin" };
 
 type TaskRow = { id: string; user_id: string; title: string; done: boolean; points: number };
 
-type Tab = "overview" | "students" | "teachers" | "exercises" | "guide" | "sessions";
+type Tab = "overview" | "students" | "teachers" | "exercises" | "exams" | "guide" | "sessions";
 
 export default function AdminDashboard() {
   const { user, logout } = useApp();
