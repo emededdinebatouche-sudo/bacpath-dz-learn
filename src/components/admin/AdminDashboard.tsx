@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, LogOut, Users, BookOpen, Compass, Video, Shield, Loader2, Save } from "lucide-react";
+import { GraduationCap, LogOut, Users, BookOpen, Compass, Video, Shield, Loader2, Save, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import ExerciseManager from "@/components/exercises/ExerciseManager";
 import LiveSessionsManager from "@/components/live/LiveSessionsManager";
+import PastExamsManager from "@/components/exams/PastExamsManager";
 
 type Profile = {
   id: string;
@@ -25,7 +26,7 @@ type RoleRow = { user_id: string; role: "student" | "teacher" | "admin" };
 
 type TaskRow = { id: string; user_id: string; title: string; done: boolean; points: number };
 
-type Tab = "overview" | "students" | "teachers" | "exercises" | "guide" | "sessions";
+type Tab = "overview" | "students" | "teachers" | "exercises" | "exams" | "guide" | "sessions";
 
 export default function AdminDashboard() {
   const { user, logout } = useApp();
@@ -59,6 +60,7 @@ export default function AdminDashboard() {
     { id: "students", label: "الطلاب", icon: Users },
     { id: "teachers", label: "الأساتذة", icon: GraduationCap },
     { id: "exercises", label: "التمارين", icon: BookOpen },
+    { id: "exams", label: "بكالوريات سابقة", icon: FileText },
     { id: "guide", label: "دليلي", icon: Compass },
     { id: "sessions", label: "الحصص المباشرة", icon: Video },
   ];
@@ -178,8 +180,11 @@ export default function AdminDashboard() {
             </div>
           ) : tab === "exercises" ? (
             <ExerciseManager />
+          ) : tab === "exams" ? (
+            <PastExamsManager />
           ) : tab === "sessions" ? (
             <LiveSessionsManager />
+
           ) : (
             <Card className="p-8 text-center space-y-2">
               <h2 className="text-xl font-display font-extrabold">قريباً</h2>
