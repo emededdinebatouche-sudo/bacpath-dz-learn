@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, LogOut, Users, BookOpen, Compass, Video, Shield, Loader2, Save } from "lucide-react";
+import { GraduationCap, LogOut, Users, BookOpen, Compass, Video, Shield, Loader2, Save, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import ExerciseManager from "@/components/exercises/ExerciseManager";
 import LiveSessionsManager from "@/components/live/LiveSessionsManager";
+import PastExamsManager from "@/components/exams/PastExamsManager";
 
 type Profile = {
   id: string;
