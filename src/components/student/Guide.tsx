@@ -1,98 +1,160 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMemo, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Compass, Clock, BookOpenCheck, ShieldAlert, AlertTriangle, Sparkles, CalendarCheck, LucideIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Compass, ArrowRight, Target, BookOpenCheck, Sparkles, GraduationCap, Quote } from "lucide-react";
 
-type Article = {
+type Stream =
+  | "علوم تجريبية"
+  | "رياضيات"
+  | "تقني رياضي"
+  | "آداب وفلسفة"
+  | "لغات أجنبية";
+
+type Story = {
   id: string;
-  icon: LucideIcon;
-  title: string;
-  short: string;
-  body: string[];
+  name: string;
+  stream: Stream;
+  average: string;
+  quote: string;
+  challenge: string;
+  method: string;
+  goldenTip: string;
 };
 
-const ARTICLES: Article[] = [
+const STREAMS: Stream[] = [
+  "علوم تجريبية",
+  "رياضيات",
+  "تقني رياضي",
+  "آداب وفلسفة",
+  "لغات أجنبية",
+];
+
+const STORIES: Story[] = [
   {
-    id: "time",
-    icon: Clock,
-    title: "كيف نظمت وقتي",
-    short: "طريقة تنظيم الوقت التي اتبعتها طوال السنة",
-    body: [
-      "قسمت يومي إلى ثلاث فترات: صباحية للمواد العلمية الثقيلة، مسائية للحفظ، وليلية للمراجعة الخفيفة.",
-      "اعتمدت تقنية بومودورو: 25 دقيقة تركيز + 5 دقائق راحة، وكل 4 جولات استراحة 20 دقيقة.",
-      "خصصت يوم الجمعة لمراجعة كل ما درسته في الأسبوع، وليس لتعلّم جديد.",
-      "نمت 7 ساعات على الأقل — السهر يقتل الحفظ ويرهق الذاكرة.",
-    ],
+    id: "amina",
+    name: "أمينة بلحاج",
+    stream: "علوم تجريبية",
+    average: "18.42",
+    quote: "لم أكن الأذكى في القسم، لكنني كنت الأكثر انتظامًا. الانضباط يهزم الموهبة كل مرة.",
+    challenge:
+      "كنت أعاني من رهبة مادة العلوم الطبيعية بسبب كثرة المصطلحات، وفي بداية السنة كان معدلي فيها 09/20 وكنت على وشك اليأس.",
+    method:
+      "قسّمت الدروس إلى بطاقات صغيرة بألوان مختلفة، وخصصت 45 دقيقة يوميًا فقط لهذه المادة قبل النوم. حللت كل مواضيع البكالوريا لآخر 10 سنوات وصحّحتها بنفسي.",
+    goldenTip:
+      "لا تقارن نفسك بالآخرين، قارن نفسك بنفسك قبل شهر. لو تحسّنت ولو قليلاً، فأنت على الطريق الصحيح.",
   },
   {
-    id: "study",
-    icon: BookOpenCheck,
-    title: "طريقة دراستي",
-    short: "خطوات الدراسة الفعّالة التي اعتمدتها",
-    body: [
-      "ابدأ بقراءة سريعة للدرس لفهم الفكرة العامة قبل الدخول في التفاصيل.",
-      "لخّص بخط يدك — الكتابة تثبّت المعلومة أكثر من القراءة فقط.",
-      "حلّ تمارين فورًا بعد كل درس، لا تؤجل التطبيق.",
-      "اشرح الدرس لنفسك بصوت مرتفع كأنك أستاذ — هذه أفضل طريقة لاكتشاف الثغرات.",
-    ],
+    id: "yacine",
+    name: "ياسين مرابط",
+    stream: "رياضيات",
+    average: "19.08",
+    quote: "الرياضيات ليست موهبة، هي عادة يومية. من يحل تمرينًا كل يوم يصل، ومن ينتظر الإلهام يخسر.",
+    challenge:
+      "أتيت من ثانوية في قرية بولاية الأغواط، وشعرت أن طلاب المدن يسبقونني بأشواط، خاصة في المسائل المعقدة للتحليل الرياضي.",
+    method:
+      "استعملت الإنترنت بذكاء: قنوات يوتيوب جزائرية، ومنتديات لطلاب سابقين. وضعت لنفسي هدفًا: 5 تمارين يوميًا مهما كان، حتى في العطل.",
+    goldenTip:
+      "ابدأ بأصعب تمرين في اليوم وأنت في قمة تركيزك. الباقي سيصبح سهلاً بعدها.",
   },
   {
-    id: "focus",
-    icon: ShieldAlert,
-    title: "محاربة السلبية والتشتت",
-    short: "كيف تتغلب على الكسل والإرهاق",
-    body: [
-      "ضع الهاتف في غرفة أخرى أثناء الدراسة — وجوده وحده يشتت التركيز.",
-      "ابدأ بـ 10 دقائق فقط عندما تشعر بالكسل، غالبًا ستكمل ساعة كاملة.",
-      "حدّد هدفًا واضحًا لكل جلسة دراسة: \"سأنهي هذا التمرين\" بدل \"سأدرس قليلاً\".",
-      "كافئ نفسك بعد كل إنجاز صغير — الدماغ يحب المكافآت.",
-    ],
-  },
-  {
-    id: "mistakes",
-    icon: AlertTriangle,
-    title: "أخطاء يجب تجنبها",
-    short: "أكثر الأخطاء التي رأيتها وتجنبتها",
-    body: [
-      "الاعتماد على ملخصات الآخرين فقط دون فهم الدرس من المصدر.",
-      "تأجيل المراجعة إلى آخر شهر — المراجعة الأخيرة تثبيت لا تعلّم.",
-      "إهمال المواد ذات المعامل المنخفض — كل نقطة مهمة في المعدل العام.",
-      "مقارنة نفسك بالآخرين بدل التركيز على تطورك الشخصي.",
-    ],
-  },
-  {
-    id: "tips",
-    icon: Sparkles,
-    title: "نصائح سريعة",
-    short: "نصائح ذهبية ستوفر عليك الكثير",
-    body: [
-      "احفظ القوانين والمعادلات في بطاقات صغيرة وراجعها يوميًا قبل النوم.",
-      "حلّ مواضيع البكالوريا للسنوات السابقة — الأسئلة تتكرر بأنماط مشابهة.",
-      "اشرب الماء بكثرة وقلل من السكريات أثناء فترات المراجعة.",
-      "ثق في تحضيرك يوم الامتحان، التوتر يضيع نصف ما حفظته.",
-    ],
-  },
-  {
-    id: "final-week",
-    icon: CalendarCheck,
-    title: "جدول المراجعة الأخيرة",
-    short: "كيف تراجع في آخر أسبوع قبل البكالوريا",
-    body: [
-      "اليوم 1-2: مراجعة المواد ذات المعامل العالي عبر الملخصات فقط.",
-      "اليوم 3-4: حل موضوعين كاملين من بكالوريات سابقة في ظروف الامتحان.",
-      "اليوم 5: مراجعة سريعة للقوانين والصيغ المهمة.",
-      "اليوم 6: راحة نسبية، مراجعة خفيفة، نوم مبكر.",
-      "اليوم 7 (يوم الامتحان): اقرأ ملخصاتك القصيرة فقط، وادخل بثقة.",
-    ],
+    id: "khadija",
+    name: "خديجة زروقي",
+    stream: "آداب وفلسفة",
+    average: "17.85",
+    quote: "شعبة الآداب ليست للحفظ الأعمى، هي شعبة التفكير. من يفهم الفلسفة يفهم الحياة.",
+    challenge:
+      "كان الجميع يقول لي إن شعبة الآداب لا مستقبل لها، وكنت أفقد الحماس. كما أن مادة الفلسفة كانت لغزًا حقيقيًا في السداسي الأول.",
+    method:
+      "قرأت مقالات فلسفية خارج المقرر لأفهم روح المادة، ودرّبت نفسي على كتابة مقال كامل كل أسبوع. راجعت التاريخ والجغرافيا عبر الخرائط الذهنية.",
+    goldenTip:
+      "في مواد الحفظ، لا تحفظ الجملة، افهم الفكرة ثم أعد صياغتها بأسلوبك. المصحح يميز الطالب المفكر فورًا.",
   },
 ];
 
+const SECTION_ICONS = {
+  challenge: Target,
+  method: BookOpenCheck,
+  tip: Sparkles,
+};
+
 export default function Guide() {
-  const [active, setActive] = useState<Article | null>(null);
+  const [filter, setFilter] = useState<string>("all");
+  const [active, setActive] = useState<Story | null>(null);
+
+  const filtered = useMemo(
+    () => (filter === "all" ? STORIES : STORIES.filter((s) => s.stream === filter)),
+    [filter],
+  );
+
+  if (active) {
+    const Challenge = SECTION_ICONS.challenge;
+    const Method = SECTION_ICONS.method;
+    const Tip = SECTION_ICONS.tip;
+    return (
+      <div className="space-y-6 pb-24 lg:pb-8" dir="rtl">
+        <Button
+          onClick={() => setActive(null)}
+          variant="ghost"
+          className="gap-2 text-primary hover:bg-primary/10"
+        >
+          <ArrowRight className="h-4 w-4" />
+          العودة إلى كل القصص
+        </Button>
+
+        {/* Student header */}
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-hero p-8 md:p-12 text-white shadow-primary">
+          <div className="absolute inset-0 bg-mesh opacity-30" />
+          <div className="relative flex flex-col md:flex-row md:items-center gap-6">
+            <div className="h-20 w-20 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center shrink-0">
+              <GraduationCap className="h-10 w-10" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl font-extrabold mb-3">{active.name}</h1>
+              <div className="flex flex-wrap gap-2">
+                <Badge className="bg-white/20 hover:bg-white/25 border-0 text-white text-sm">
+                  {active.stream}
+                </Badge>
+                <Badge className="bg-white/20 hover:bg-white/25 border-0 text-white text-sm">
+                  معدل الباك: {active.average}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Sections */}
+        <div className="grid gap-4">
+          {[
+            { icon: Challenge, title: "التحدي", body: active.challenge },
+            { icon: Method, title: "الطريقة", body: active.method },
+            { icon: Tip, title: "النصيحة الذهبية", body: active.goldenTip },
+          ].map((s) => {
+            const Icon = s.icon;
+            return (
+              <Card key={s.title} className="bg-gradient-card border-border/60">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="h-11 w-11 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-primary">
+                      <Icon className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                    <CardTitle className="text-xl">{s.title}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="leading-relaxed text-foreground/90 text-base">{s.body}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8 pb-24 lg:pb-8">
+    <div className="space-y-8 pb-24 lg:pb-8" dir="rtl">
       {/* Hero */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-hero p-8 md:p-12 text-white shadow-primary">
         <div className="absolute inset-0 bg-mesh opacity-30" />
@@ -101,70 +163,79 @@ export default function Guide() {
             <Compass className="h-4 w-4" />
             دليلي
           </div>
-          <h1 className="text-3xl md:text-5xl font-extrabold mb-3 leading-tight">
-            دليلي - تجربتي مع البكالوريا
-          </h1>
+          <h1 className="text-3xl md:text-5xl font-extrabold mb-3 leading-tight">دليلي</h1>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl">
             قصص نجاح حقيقية من طلاب جزائريين
           </p>
         </div>
       </section>
 
-      {/* Articles */}
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {ARTICLES.map((article) => {
-          const Icon = article.icon;
-          return (
-            <Card key={article.id} className="card-hover bg-gradient-card border-border/60">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-primary mb-3">
-                  <Icon className="h-6 w-6 text-white" />
-                </div>
-                <CardTitle className="text-xl">{article.title}</CardTitle>
-                <CardDescription className="leading-relaxed">{article.short}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  onClick={() => setActive(article)}
-                  variant="outline"
-                  className="w-full border-primary/30 text-primary hover:bg-gradient-primary hover:text-white hover:border-transparent transition-smooth"
-                >
-                  اقرأ أكثر
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </section>
+      {/* Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <label className="text-sm font-semibold text-foreground/80">تصفية حسب الشعبة:</label>
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger className="w-full sm:w-64">
+            <SelectValue placeholder="كل الشعب" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل الشعب</SelectItem>
+            {STREAMS.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-      {/* Article modal */}
-      <Dialog open={!!active} onOpenChange={(o) => !o && setActive(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto" dir="rtl">
-          {active && (
-            <>
-              <DialogHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="h-11 w-11 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-primary">
-                    <active.icon className="h-5 w-5 text-white" />
-                  </div>
-                  <DialogTitle className="text-2xl text-right">{active.title}</DialogTitle>
+      {/* Grid */}
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((story) => (
+          <Card
+            key={story.id}
+            className="card-hover bg-gradient-card border-border/60 flex flex-col"
+          >
+            <CardHeader>
+              <div className="flex items-start gap-3 mb-2">
+                <div className="h-12 w-12 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-primary shrink-0">
+                  <GraduationCap className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <DialogDescription className="text-right text-base">{active.short}</DialogDescription>
-              </DialogHeader>
-              <ul className="space-y-3 mt-4">
-                {active.body.map((p, i) => (
-                  <li key={i} className="flex gap-3 p-4 rounded-xl bg-muted/50 border border-border/60">
-                    <span className="flex-shrink-0 h-7 w-7 rounded-full bg-gradient-primary text-white text-sm font-bold flex items-center justify-center">
-                      {i + 1}
-                    </span>
-                    <p className="leading-relaxed text-foreground/90">{p}</p>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-lg leading-tight mb-1">{story.name}</CardTitle>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Badge variant="secondary" className="text-xs">
+                      {story.stream}
+                    </Badge>
+                    <Badge className="text-xs bg-gradient-primary border-0 text-primary-foreground">
+                      {story.average}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="flex flex-col flex-1 gap-4">
+              <div className="relative flex-1 p-4 rounded-xl bg-muted/50 border border-border/60">
+                <Quote className="absolute top-2 left-2 h-4 w-4 text-primary/40" />
+                <p className="text-sm leading-relaxed text-foreground/90 pr-2">
+                  {story.quote}
+                </p>
+              </div>
+              <Button
+                onClick={() => setActive(story)}
+                variant="outline"
+                className="w-full border-primary/30 text-primary hover:bg-gradient-primary hover:text-primary-foreground hover:border-transparent transition-smooth"
+              >
+                اقرأ القصة
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+        {filtered.length === 0 && (
+          <p className="text-muted-foreground col-span-full text-center py-12">
+            لا توجد قصص في هذه الشعبة بعد.
+          </p>
+        )}
+      </section>
     </div>
   );
 }
