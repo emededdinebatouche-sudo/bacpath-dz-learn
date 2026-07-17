@@ -1,0 +1,227 @@
+{
+  "version": 1,
+  "sdk_version": "0.23.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://hqobknpxyxtcxhyrijrn.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "bacpath-mcp",
+      "version": "0.1.0",
+      "title": "BacPath MCP"
+    },
+    "tools": [
+      {
+        "name": "get_profile",
+        "title": "Get my profile",
+        "description": "Return the signed-in BacPath user's profile: name, stream, points, level, streak, and role.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_tasks",
+        "title": "List my study tasks",
+        "description": "List the signed-in user's BacPath study tasks. Optionally filter by done status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "done": {
+              "description": "If set, only return tasks with this done status.",
+              "type": "boolean"
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_task",
+        "title": "Create study task",
+        "description": "Add a new BacPath study task to the signed-in user's plan.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Task title."
+            },
+            "subject": {
+              "type": "string",
+              "enum": [
+                "math",
+                "physics",
+                "chemistry",
+                "history"
+              ],
+              "description": "Subject key."
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 600,
+              "description": "Estimated duration in minutes."
+            },
+            "points": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "description": "Points awarded on completion."
+            }
+          },
+          "required": [
+            "title",
+            "subject",
+            "duration",
+            "points"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "complete_task",
+        "title": "Mark task done",
+        "description": "Mark one of the signed-in user's tasks as completed and award its points.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "task_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Task id to mark done."
+            }
+          },
+          "required": [
+            "task_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_live_sessions",
+        "title": "List live sessions",
+        "description": "List BacPath live sessions (upcoming by default). Only registered students can see the stream link.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "when": {
+              "description": "Filter: upcoming (default), past, or all.",
+              "type": "string",
+              "enum": [
+                "upcoming",
+                "past",
+                "all"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_questions",
+        "title": "List Q&A questions",
+        "description": "List questions posted to the BacPath Q&A board, newest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "description": "Filter by subject text.",
+              "type": "string"
+            },
+            "answered": {
+              "description": "If set, filter by whether the question has been answered.",
+              "type": "boolean"
+            },
+            "limit": {
+              "description": "Max results (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "ask_question",
+        "title": "Ask a Q&A question",
+        "description": "Post a new question to the BacPath Q&A board on behalf of the signed-in user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Subject (e.g. رياضيات، فيزياء)."
+            },
+            "question": {
+              "type": "string",
+              "minLength": 3,
+              "description": "The question text."
+            }
+          },
+          "required": [
+            "subject",
+            "question"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
