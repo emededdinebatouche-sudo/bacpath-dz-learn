@@ -49,7 +49,12 @@ export default function AuthPage() {
   const [stream, setStream] = useState<string>("sciences");
   const [teacherSubject, setTeacherSubject] = useState<string>("");
 
+  // Preserve OAuth consent redirect: `/auth?next=<same-origin relative path>`.
+  const rawNext = new URLSearchParams(window.location.search).get("next");
+  const nextPath = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
+
   const redirectFor = async (email: string | undefined, userId: string) => {
+    if (nextPath) return nextPath;
     if (email === "batoucheimad0@gmail.com") return "/admin";
     const { data: roleRow } = await supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle();
     if (roleRow?.role === "teacher") return "/teacher";
@@ -63,6 +68,7 @@ export default function AuthPage() {
         navigate(path, { replace: true });
       }
     });
+     
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,7 +89,7 @@ export default function AuthPage() {
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: `${window.location.origin}${nextPath ?? "/"}`,
             data: {
               full_name: parsed.data.fullName,
               role: parsed.data.role,
