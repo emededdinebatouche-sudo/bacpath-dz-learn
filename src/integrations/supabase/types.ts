@@ -318,7 +318,86 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      live_questions_public: {
+        Row: {
+          answer: string | null
+          answered_by_name: string | null
+          created_at: string | null
+          id: string | null
+          is_mine: boolean | null
+          question: string | null
+          session_id: string | null
+          updated_at: string | null
+          user_name: string | null
+        }
+        Insert: {
+          answer?: string | null
+          answered_by_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_mine?: never
+          question?: string | null
+          session_id?: string | null
+          updated_at?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          answer?: string | null
+          answered_by_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_mine?: never
+          question?: string | null
+          session_id?: string | null
+          updated_at?: string | null
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_questions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      qa_questions_public: {
+        Row: {
+          answer: string | null
+          answered_by_name: string | null
+          created_at: string | null
+          id: string | null
+          is_mine: boolean | null
+          question: string | null
+          subject: string | null
+          updated_at: string | null
+          user_name: string | null
+        }
+        Insert: {
+          answer?: string | null
+          answered_by_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_mine?: never
+          question?: string | null
+          subject?: string | null
+          updated_at?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          answer?: string | null
+          answered_by_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_mine?: never
+          question?: string | null
+          subject?: string | null
+          updated_at?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
