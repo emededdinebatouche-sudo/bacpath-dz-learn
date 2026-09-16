@@ -367,6 +367,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      my_points_standing: {
+        Args: never
+        Returns: {
+          better_than: number
+          my_points: number
+          percentile: number
+          total_students: number
+        }[]
+      }
     }
     Enums: {
       app_role: "student" | "teacher" | "admin"
