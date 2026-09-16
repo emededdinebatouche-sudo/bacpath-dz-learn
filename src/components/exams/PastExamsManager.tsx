@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Trash2, Loader2, FileText, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import { logAudit } from "@/lib/audit";
 
 export type PastExam = {
   id: string;
@@ -91,13 +92,16 @@ export default function PastExamsManager() {
         title: title.trim() || null, exam_path, solution_path,
         points, duration,
       };
+      const auditTitle = payload.title || `${payload.subject} ${payload.year}`;
       if (editing) {
         const { error } = await supabase.from("past_exams" as any).update(payload).eq("id", editing.id);
         if (error) throw error;
+        await logAudit(user, "updated", "past_exam", { entityId: editing.id, title: auditTitle, details: { year: payload.year, branch: payload.branch, subject: payload.subject } });
         toast.success("تم التحديث");
       } else {
-        const { error } = await supabase.from("past_exams" as any).insert({ ...payload, created_by: user.id });
+        const { data, error } = await supabase.from("past_exams" as any).insert({ ...payload, created_by: user.id }).select("id").single();
         if (error) throw error;
+        await logAudit(user, "created", "past_exam", { entityId: (data as any)?.id ?? null, title: auditTitle, details: { year: payload.year, branch: payload.branch, subject: payload.subject } });
         toast.success("تمت إضافة الامتحان");
       }
       setOpen(false); reset(); load();
@@ -112,6 +116,7 @@ export default function PastExamsManager() {
     if (paths.length) await supabase.storage.from(BUCKET).remove(paths);
     const { error } = await supabase.from("past_exams" as any).delete().eq("id", ex.id);
     if (error) { toast.error(error.message); return; }
+    await logAudit(user, "deleted", "past_exam", { entityId: ex.id, title: ex.title || `${ex.subject} ${ex.year}`, details: { year: ex.year, branch: ex.branch, subject: ex.subject } });
     toast.success("تم الحذف");
     setItems(prev => prev.filter(x => x.id !== ex.id));
   };

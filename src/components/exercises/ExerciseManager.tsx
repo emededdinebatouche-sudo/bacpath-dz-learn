@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Pencil, Trash2, Loader2, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { logAudit } from "@/lib/audit";
 
 export type Exercise = {
   id: string;
@@ -83,12 +84,14 @@ export default function ExerciseManager() {
         title: title.trim(), subject: subject.trim(), difficulty, content, solution, points, duration,
       }).eq("id", editing.id);
       if (error) { toast.error(error.message); return; }
+      await logAudit(user, "updated", "exercise", { entityId: editing.id, title: title.trim(), details: { subject: subject.trim(), difficulty } });
       toast.success("تم تحديث التمرين");
     } else {
-      const { error } = await supabase.from("exercises" as any).insert({
+      const { data, error } = await supabase.from("exercises" as any).insert({
         created_by: user.id, title: title.trim(), subject: subject.trim(), difficulty, content, solution, points, duration,
-      });
+      }).select("id").single();
       if (error) { toast.error(error.message); return; }
+      await logAudit(user, "created", "exercise", { entityId: (data as any)?.id ?? null, title: title.trim(), details: { subject: subject.trim(), difficulty } });
       toast.success("تمت إضافة التمرين");
     }
     setOpen(false); reset(); load();
@@ -96,8 +99,10 @@ export default function ExerciseManager() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("حذف هذا التمرين؟")) return;
+    const target = items.find(x => x.id === id);
     const { error } = await supabase.from("exercises" as any).delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
+    await logAudit(user, "deleted", "exercise", { entityId: id, title: target?.title ?? "", details: { subject: target?.subject } });
     toast.success("تم الحذف");
     setItems(prev => prev.filter(x => x.id !== id));
   };

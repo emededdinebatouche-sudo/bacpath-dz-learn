@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Calendar, ExternalLink, Video } from "lucide-react";
 import { toast } from "sonner";
+import { logAudit } from "@/lib/audit";
 
 export type LiveSession = {
   id: string;
@@ -81,10 +82,12 @@ export default function LiveSessionsManager() {
     if (editing) {
       const { error } = await supabase.from("live_sessions" as any).update(payload).eq("id", editing.id);
       if (error) return toast.error(error.message);
+      await logAudit(user, "updated", "live_session", { entityId: editing.id, title: payload.title, details: { subject: payload.subject, scheduled_at: payload.scheduled_at } });
       toast.success("تم تحديث الحصة");
     } else {
-      const { error } = await supabase.from("live_sessions" as any).insert({ ...payload, created_by: user.id, status: "scheduled" });
+      const { data, error } = await supabase.from("live_sessions" as any).insert({ ...payload, created_by: user.id, status: "scheduled" }).select("id").single();
       if (error) return toast.error(error.message);
+      await logAudit(user, "created", "live_session", { entityId: (data as any)?.id ?? null, title: payload.title, details: { subject: payload.subject, scheduled_at: payload.scheduled_at } });
       toast.success("تمت جدولة الحصة");
     }
     setOpen(false); reset(); load();
@@ -93,6 +96,7 @@ export default function LiveSessionsManager() {
   const cancel = async (s: LiveSession) => {
     const { error } = await supabase.from("live_sessions" as any).update({ status: "cancelled" }).eq("id", s.id);
     if (error) return toast.error(error.message);
+    await logAudit(user, "cancelled", "live_session", { entityId: s.id, title: s.title, details: { subject: s.subject } });
     toast.success("تم إلغاء الحصة");
     load();
   };
@@ -100,6 +104,7 @@ export default function LiveSessionsManager() {
   const remove = async (s: LiveSession) => {
     const { error } = await supabase.from("live_sessions" as any).delete().eq("id", s.id);
     if (error) return toast.error(error.message);
+    await logAudit(user, "deleted", "live_session", { entityId: s.id, title: s.title, details: { subject: s.subject } });
     toast.success("تم الحذف");
     load();
   };
