@@ -10,6 +10,8 @@ import { useApp, SUBJECT_META, Subject } from "@/lib/state";
 import { Clock, Zap, Check, Calendar, Plus, Trash2, Play, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import QuoteCard from "@/components/common/QuoteCard";
+import { useMotivationalQuote } from "@/hooks/useMotivationalQuote";
 
 function playBeep() {
   try {
@@ -42,6 +44,7 @@ function computeAward(base: number, durationMin: number, elapsedSec: number) {
 
 export default function StudyPlan() {
   const { tasks, completeTask, addTask, deleteTask } = useApp();
+  const { next: nextQuote } = useMotivationalQuote();
   const today = new Date().toLocaleDateString("ar-DZ", { weekday: "long", day: "numeric", month: "long" });
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -95,7 +98,7 @@ export default function StudyPlan() {
     if (!activeTask) return;
     const award = computeAward(activeTask.points, activeTask.duration, elapsed);
     await completeTask(activeTask.id, award);
-    toast.success(`أحسنت! +${award} نقطة 🎉`, { description: activeTask.title });
+    toast.success(`أحسنت! +${award} نقطة 🎉`, { description: `✨ ${nextQuote()}`, duration: 5000 });
     handleStop();
   };
 

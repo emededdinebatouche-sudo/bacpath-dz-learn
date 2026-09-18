@@ -3,6 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useApp, SUBJECT_META, Subject } from "@/lib/state";
 import { Flame, Trophy, Zap, ChevronLeft, ListTodo, BookOpen, Video } from "lucide-react";
+import QuoteCard from "@/components/common/QuoteCard";
 
 interface Props { onNavigate: (p: string) => void; }
 
@@ -34,6 +35,9 @@ export default function StudentDashboard({ onNavigate }: Props) {
           </div>
         </div>
       </Card>
+
+      <QuoteCard />
+
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 md:gap-5">
