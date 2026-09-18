@@ -10,6 +10,7 @@ import { BookOpen, Zap, ChevronLeft, Clock, Check, X, Eye, Square, Loader2 } fro
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import PastExams from "@/components/student/PastExams";
+import { useMotivationalQuote } from "@/hooks/useMotivationalQuote";
 
 type Exercise = {
   id: string;
@@ -45,6 +46,7 @@ function playBeep() {
 
 export default function Exercises() {
   const { addPoints } = useApp();
+  const { next: nextQuote } = useMotivationalQuote();
   const [items, setItems] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [subjectFilter, setSubjectFilter] = useState<string>("all");
@@ -112,7 +114,7 @@ export default function Exercises() {
   const markCorrect = async () => {
     if (!active) return;
     await addPoints(active.points);
-    toast.success(`أحسنت! +${active.points} نقطة 🎉`, { description: active.title });
+    toast.success(`أحسنت! +${active.points} نقطة 🎉`, { description: `✨ ${nextQuote()}`, duration: 5000 });
     cancel();
   };
   const markWrong = () => {
