@@ -15,19 +15,19 @@ let inflight: Promise<string[]> | null = null;
 async function loadQuotes(): Promise<string[]> {
   if (cache) return cache;
   if (!inflight) {
-    inflight = supabase
-      .from("motivational_quotes" as any)
-      .select("text")
-      .eq("is_active", true)
-      .then(({ data }) => {
+    inflight = (async () => {
+      try {
+        const { data } = await supabase
+          .from("motivational_quotes" as any)
+          .select("text")
+          .eq("is_active", true);
         const list = ((data as any[]) || []).map(r => r.text).filter(Boolean);
         cache = list.length ? list : FALLBACK;
-        return cache;
-      })
-      .catch(() => {
+      } catch {
         cache = FALLBACK;
-        return cache;
-      }) as Promise<string[]>;
+      }
+      return cache;
+    })();
   }
   return inflight;
 }
