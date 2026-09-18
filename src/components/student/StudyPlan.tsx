@@ -167,6 +167,9 @@ export default function StudyPlan() {
         </Dialog>
       </div>
 
+      <QuoteCard />
+
+
       {activeTask && (
         <Card className={cn("p-6 text-center border-2", warn ? "border-warning" : overtime ? "border-destructive" : "border-primary")}>
           <p className="text-sm text-muted-foreground font-semibold mb-1">جاري العمل على</p>
