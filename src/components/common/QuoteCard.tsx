@@ -15,7 +15,7 @@ export default function QuoteCard({ className }: { className?: string }) {
       )}
     >
       <div className="h-9 w-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-primary flex-shrink-0">
-        <Sparkles className="h-4.5 w-4.5 h-[18px] w-[18px] text-white" />
+        <Sparkles className="h-[18px] w-[18px] text-white" />
       </div>
       <p className="font-display font-bold text-base md:text-lg text-foreground">{quote}</p>
     </Card>
