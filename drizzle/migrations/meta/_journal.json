@@ -15,6 +15,13 @@
       "when": 1792861723489,
       "tag": "0001_create_learning_resources",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792861995162,
+      "tag": "0002_create_resource_favorites",
+      "breakpoints": true
     }
   ]
 }
