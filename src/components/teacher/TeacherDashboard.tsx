@@ -10,11 +10,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useApp, SUBJECT_META, Subject } from "@/lib/state";
-import { Plus, BookOpen, Video, Users, GraduationCap, LogOut, TrendingUp, Calendar } from "lucide-react";
+import { Plus, BookOpen, Library, Users, GraduationCap, LogOut, TrendingUp, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import ExerciseManager from "@/components/exercises/ExerciseManager";
-import LiveSessionsManager from "@/components/live/LiveSessionsManager";
+import Resources from "@/components/resources/Resources";
 
 const STUDENTS = [
   { name: "أمين الجزائري", points: 1280, level: 2, progress: 78 },
@@ -63,19 +63,18 @@ export default function TeacherDashboard() {
           <div className="relative">
             <p className="text-white/80 text-sm font-semibold">مرحباً أستاذ 👨‍🏫</p>
             <h1 className="font-display text-3xl md:text-4xl font-extrabold">{user.name}</h1>
-            <p className="text-white/80 mt-2">إدارة الدروس، التمارين، وحصص الطلاب</p>
+            <p className="text-white/80 mt-2">إدارة المصادر التعليمية والتمارين</p>
           </div>
         </Card>
 
         <div className="grid grid-cols-3 gap-3 md:gap-5">
           <StatCard icon={Users} label="طلابي" value="142" gradient="from-blue-500 to-indigo-600" />
           <StatCard icon={BookOpen} label="دروسي" value={`${lessons.length}`} gradient="from-violet-500 to-purple-600" />
-          <StatCard icon={Video} label="حصص قادمة" value="3" gradient="from-pink-500 to-rose-600" />
         </div>
 
-        <Tabs defaultValue="live">
+        <Tabs defaultValue="resources">
           <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="live">الحصص المباشرة</TabsTrigger>
+            <TabsTrigger value="resources">مصادري</TabsTrigger>
             <TabsTrigger value="students">تقدّم الطلاب</TabsTrigger>
             <TabsTrigger value="content">تمارين (اختياري)</TabsTrigger>
           </TabsList>
@@ -84,8 +83,8 @@ export default function TeacherDashboard() {
             <ExerciseManager />
           </TabsContent>
 
-          <TabsContent value="live" className="space-y-4 mt-5">
-            <LiveSessionsManager />
+          <TabsContent value="resources" className="space-y-4 mt-5">
+            <Resources />
           </TabsContent>
 
           <TabsContent value="students" className="space-y-3 mt-5">

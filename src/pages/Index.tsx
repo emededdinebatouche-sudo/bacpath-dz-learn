@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import StudentDashboard from "@/components/student/StudentDashboard";
 import StudyPlan from "@/components/student/StudyPlan";
 import Exercises from "@/components/student/Exercises";
-import LiveLessons from "@/components/student/LiveLessons";
+import Resources from "@/components/resources/Resources";
 import Achievements from "@/components/student/Achievements";
 import Guide from "@/components/student/Guide";
 import TeacherDashboard from "@/components/teacher/TeacherDashboard";
@@ -50,7 +50,7 @@ const Index = () => {
       case "plan": return <StudyPlan />;
       case "exercises": return <Exercises />;
       case "guide": return <Guide />;
-      case "live": return <LiveLessons />;
+      case "resources": return <Resources />;
       case "achievements": return <Achievements />;
       default: return <StudentDashboard onNavigate={setPage} />;
     }

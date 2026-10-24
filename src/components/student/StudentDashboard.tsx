@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useApp, SUBJECT_META, Subject } from "@/lib/state";
-import { Flame, Trophy, Zap, ChevronLeft, ListTodo, BookOpen, Video } from "lucide-react";
+import { Flame, Trophy, Zap, ChevronLeft, ListTodo, BookOpen, Library } from "lucide-react";
 import QuoteCard from "@/components/common/QuoteCard";
 
 interface Props { onNavigate: (p: string) => void; }
@@ -96,20 +96,16 @@ export default function StudentDashboard({ onNavigate }: Props) {
         </div>
       </Card>
 
-      {/* Live now */}
+      {/* Resources */}
       <Card className="p-5 md:p-6 border-border/60 relative overflow-hidden">
-        <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-destructive/10 text-destructive px-2.5 py-1 rounded-full text-xs font-bold">
-          <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" /> مباشر الآن
-        </div>
         <div className="flex items-start gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-md flex-shrink-0">
-            <Video className="h-7 w-7 text-white" />
+          <div className="h-14 w-14 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+            <Library className="h-7 w-7" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-display font-bold text-lg mb-1">حصة الرياضيات: المعادلات التفاضلية</h3>
-            <p className="text-sm text-muted-foreground mb-3">مع الأستاذ سامي بوزيد · 1.2K طالب يشاهدون</p>
-            <Button onClick={() => onNavigate("live")} size="sm" className="bg-gradient-primary hover:opacity-95">
-              انضم الآن
+            <h3 className="font-display font-bold text-lg mb-3">مصادري</h3>
+            <Button onClick={() => onNavigate("resources")} size="sm" className="bg-gradient-primary hover:opacity-95">
+              تصفّح المصادر
             </Button>
           </div>
         </div>

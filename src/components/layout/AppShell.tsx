@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { useApp } from "@/lib/state";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, LayoutDashboard, ListTodo, BookOpen, Video, Trophy, Compass, LogOut, Menu, X } from "lucide-react";
+import { GraduationCap, LayoutDashboard, ListTodo, BookOpen, Library, Trophy, Compass, LogOut, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -10,7 +10,7 @@ const NAV = [
   { id: "plan", label: "خطة اليوم", icon: ListTodo },
   { id: "exercises", label: "التمارين", icon: BookOpen },
   { id: "guide", label: "دليلي", icon: Compass },
-  { id: "live", label: "مباشر", icon: Video },
+  { id: "resources", label: "مصادري", icon: Library },
   { id: "achievements", label: "الإنجازات", icon: Trophy },
 ];
 
