@@ -8,6 +8,13 @@
       "when": 1789664494632,
       "tag": "0000_create_motivational_quotes",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792861723489,
+      "tag": "0001_create_learning_resources",
+      "breakpoints": true
     }
   ]
 }
