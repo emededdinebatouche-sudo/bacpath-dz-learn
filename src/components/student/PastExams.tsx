@@ -4,9 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useApp } from "@/lib/state";
-import { FileText, Loader2, ExternalLink, Play, Square, Clock, Check, X, BookMarked } from "lucide-react";
+import { FileText, Loader2, ExternalLink, Play, Square, Clock, Check, X, BookMarked, Filter, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { PastExam } from "@/components/exams/PastExamsManager";
@@ -113,19 +114,41 @@ export default function PastExams() {
         <Badge variant="secondary">{items.length}</Badge>
       </div>
 
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-primary" />
+          <span className="text-sm font-bold">تصفية النتائج</span>
+          <Badge variant="secondary">{filtered.length}</Badge>
+        </div>
+        {(year !== ALL || branch !== ALL || subject !== ALL) && (
+          <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => { setYear(ALL); setBranch(ALL); setSubject(ALL); }}>
+            <RotateCcw className="h-3.5 w-3.5" /> مسح الفلاتر
+          </Button>
+        )}
+      </div>
+
       <div className="grid grid-cols-3 gap-2">
-        <Select value={year} onValueChange={setYear}>
-          <SelectTrigger><SelectValue placeholder="السنة" /></SelectTrigger>
-          <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y === ALL ? "كل السنوات" : y}</SelectItem>)}</SelectContent>
-        </Select>
-        <Select value={branch} onValueChange={setBranch}>
-          <SelectTrigger><SelectValue placeholder="الشعبة" /></SelectTrigger>
-          <SelectContent>{branches.map(b => <SelectItem key={b} value={b}>{b === ALL ? "كل الشعب" : b}</SelectItem>)}</SelectContent>
-        </Select>
-        <Select value={subject} onValueChange={setSubject}>
-          <SelectTrigger><SelectValue placeholder="المادة" /></SelectTrigger>
-          <SelectContent>{subjects.map(s => <SelectItem key={s} value={s}>{s === ALL ? "كل المواد" : s}</SelectItem>)}</SelectContent>
-        </Select>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">المادة</Label>
+          <Select value={subject} onValueChange={setSubject}>
+            <SelectTrigger><SelectValue placeholder="المادة" /></SelectTrigger>
+            <SelectContent>{subjects.map(s => <SelectItem key={s} value={s}>{s === ALL ? "كل المواد" : s}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">الشعبة</Label>
+          <Select value={branch} onValueChange={setBranch}>
+            <SelectTrigger><SelectValue placeholder="الشعبة" /></SelectTrigger>
+            <SelectContent>{branches.map(b => <SelectItem key={b} value={b}>{b === ALL ? "كل الشعب" : b}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">سنة الامتحان</Label>
+          <Select value={year} onValueChange={setYear}>
+            <SelectTrigger><SelectValue placeholder="السنة" /></SelectTrigger>
+            <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y === ALL ? "كل السنوات" : y}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
       </div>
 
       {loading ? (
