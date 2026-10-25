@@ -145,6 +145,32 @@ export default function PastExams() {
         <Badge variant="secondary">{items.length}</Badge>
       </div>
 
+      <Card className="p-4 bg-gradient-card border-primary/20 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="font-display font-bold text-sm">متتبع الحل منذ {START_YEAR}</span>
+          <Badge className="bg-gradient-primary text-primary-foreground border-0">{trackDone}/{trackTotal}</Badge>
+        </div>
+        <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div className="h-full bg-gradient-primary transition-all" style={{ width: `${trackTotal ? (trackDone / trackTotal) * 100 : 0}%` }} />
+        </div>
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-10 gap-2">
+          {tracker.map(r => {
+            const full = r.total > 0 && r.done === r.total;
+            return (
+              <button key={r.year} type="button" disabled={!r.total}
+                onClick={() => setYear(year === String(r.year) ? ALL : String(r.year))}
+                className={cn("rounded-lg border p-1.5 text-center transition-smooth",
+                  !r.total && "opacity-40 cursor-not-allowed",
+                  full ? "bg-gradient-primary text-primary-foreground border-transparent" : r.done ? "border-primary/50 bg-primary/10" : "border-border bg-background",
+                  year === String(r.year) && "ring-2 ring-primary")}>
+                <div className="text-xs font-bold">{r.year}</div>
+                <div className="text-[10px]">{r.total ? `${r.done}/${r.total}` : "—"}</div>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
+
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-primary" />
@@ -196,6 +222,7 @@ export default function PastExams() {
                 <Badge variant="outline" className="text-[10px] font-bold">{ex.subject}</Badge>
                 <Badge variant="outline" className="text-[10px]"><Clock className="h-2.5 w-2.5 ml-1" />{ex.duration}د</Badge>
                 <Badge variant="outline" className="text-[10px] text-primary border-primary/30">{ex.points} نقطة</Badge>
+                {solved[ex.id] && <Badge className="bg-primary/15 text-primary border-0 text-[10px]"><Check className="h-2.5 w-2.5 ml-1" />محلول</Badge>}
               </div>
               {ex.title && <h3 className="font-display font-bold text-sm mb-2">{ex.title}</h3>}
               <div className="flex gap-2">
