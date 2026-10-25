@@ -241,6 +241,38 @@ export type Database = {
         }
         Relationships: []
       }
+      past_exam_attempts: {
+        Row: {
+          correct: boolean
+          created_at: string
+          exam_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          correct?: boolean
+          created_at?: string
+          exam_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          correct?: boolean
+          created_at?: string
+          exam_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "past_exam_attempts_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "past_exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       past_exams: {
         Row: {
           branch: string

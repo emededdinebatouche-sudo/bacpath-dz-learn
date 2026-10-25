@@ -43,10 +43,18 @@ export default function PastExams() {
   const intRef = useRef<number | null>(null);
   const beepedRef = useRef(false);
 
+  const [solved, setSolved] = useState<Record<string, boolean>>({});
+
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("past_exams" as any).select("*").order("year", { ascending: false });
+      const [{ data }, { data: att }] = await Promise.all([
+        supabase.from("past_exams" as any).select("*").order("year", { ascending: false }),
+        supabase.from("past_exam_attempts").select("exam_id, correct"),
+      ]);
       setItems((data as any) || []);
+      const map: Record<string, boolean> = {};
+      (att || []).forEach((a: any) => { map[a.exam_id] = a.correct; });
+      setSolved(map);
       setLoading(false);
     })();
   }, []);
@@ -91,11 +99,34 @@ export default function PastExams() {
 
   const finish = async (correct: boolean) => {
     if (!active) return;
-    const award = correct ? active.points : 0;
+    const already = solved[active.id] === true;
+    const award = correct && !already ? active.points : 0;
     if (award > 0 && addPoints) await addPoints(award);
-    toast.success(correct ? `أحسنت! +${award} نقطة` : "لا بأس، حاول لاحقاً");
+    const { data: auth } = await supabase.auth.getUser();
+    if (auth.user) {
+      const keep = correct || already;
+      await supabase.from("past_exam_attempts").upsert(
+        { user_id: auth.user.id, exam_id: active.id, correct: keep },
+        { onConflict: "user_id,exam_id" }
+      );
+      setSolved(s => ({ ...s, [active.id]: keep }));
+    }
+    toast.success(correct ? (award ? `أحسنت! +${award} نقطة` : "أحسنت! سبق أن حللت هذا الامتحان") : "لا بأس، حاول لاحقاً");
     setActive(null); setRunning(false); setElapsed(0); setShowSolution(false);
   };
+
+  const START_YEAR = 2008;
+  const tracker = useMemo(() => {
+    const now = new Date().getFullYear();
+    const rows = [];
+    for (let y = now; y >= START_YEAR; y--) {
+      const exams = items.filter(i => i.year === y && (branch === ALL || i.branch === branch) && (subject === ALL || i.subject === subject));
+      rows.push({ year: y, total: exams.length, done: exams.filter(e => solved[e.id]).length });
+    }
+    return rows;
+  }, [items, solved, branch, subject]);
+  const trackTotal = tracker.reduce((a, r) => a + r.total, 0);
+  const trackDone = tracker.reduce((a, r) => a + r.done, 0);
 
   const totalSec = (active?.duration || 0) * 60;
   const remaining = Math.max(0, totalSec - elapsed);
@@ -113,6 +144,32 @@ export default function PastExams() {
         <h1 className="font-display font-extrabold text-2xl md:text-3xl">بكالوريات سابقة</h1>
         <Badge variant="secondary">{items.length}</Badge>
       </div>
+
+      <Card className="p-4 bg-gradient-card border-primary/20 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="font-display font-bold text-sm">متتبع الحل منذ {START_YEAR}</span>
+          <Badge className="bg-gradient-primary text-primary-foreground border-0">{trackDone}/{trackTotal}</Badge>
+        </div>
+        <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div className="h-full bg-gradient-primary transition-all" style={{ width: `${trackTotal ? (trackDone / trackTotal) * 100 : 0}%` }} />
+        </div>
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-10 gap-2">
+          {tracker.map(r => {
+            const full = r.total > 0 && r.done === r.total;
+            return (
+              <button key={r.year} type="button" disabled={!r.total}
+                onClick={() => setYear(year === String(r.year) ? ALL : String(r.year))}
+                className={cn("rounded-lg border p-1.5 text-center transition-smooth",
+                  !r.total && "opacity-40 cursor-not-allowed",
+                  full ? "bg-gradient-primary text-primary-foreground border-transparent" : r.done ? "border-primary/50 bg-primary/10" : "border-border bg-background",
+                  year === String(r.year) && "ring-2 ring-primary")}>
+                <div className="text-xs font-bold">{r.year}</div>
+                <div className="text-[10px]">{r.total ? `${r.done}/${r.total}` : "—"}</div>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
 
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -165,6 +222,7 @@ export default function PastExams() {
                 <Badge variant="outline" className="text-[10px] font-bold">{ex.subject}</Badge>
                 <Badge variant="outline" className="text-[10px]"><Clock className="h-2.5 w-2.5 ml-1" />{ex.duration}د</Badge>
                 <Badge variant="outline" className="text-[10px] text-primary border-primary/30">{ex.points} نقطة</Badge>
+                {solved[ex.id] && <Badge className="bg-primary/15 text-primary border-0 text-[10px]"><Check className="h-2.5 w-2.5 ml-1" />محلول</Badge>}
               </div>
               {ex.title && <h3 className="font-display font-bold text-sm mb-2">{ex.title}</h3>}
               <div className="flex gap-2">
