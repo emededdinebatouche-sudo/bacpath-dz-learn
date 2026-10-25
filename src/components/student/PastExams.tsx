@@ -104,10 +104,12 @@ export default function PastExams() {
   const warn = !overtime && remaining <= 5 * 60;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <BookMarked className="h-5 w-5 text-primary" />
-        <h2 className="font-display font-bold text-lg">بكالوريات سابقة</h2>
+    <div className="space-y-6 animate-fade-in pb-8">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="h-12 w-12 rounded-lg bg-gradient-primary flex items-center justify-center shadow-primary">
+          <BookMarked className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <h1 className="font-display font-extrabold text-2xl md:text-3xl">بكالوريات سابقة</h1>
         <Badge variant="secondary">{items.length}</Badge>
       </div>
 

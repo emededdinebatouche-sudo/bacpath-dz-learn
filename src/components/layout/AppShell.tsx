@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { id: "dashboard", label: "الرئيسية", icon: LayoutDashboard },
   { id: "plan", label: "خطة اليوم", icon: ListTodo },
-  { id: "exercises", label: "التمارين", icon: BookOpen },
+  { id: "exercises", label: "بكالوريات سابقة", icon: BookOpen },
   { id: "guide", label: "دليلي", icon: Compass },
   { id: "resources", label: "مصادري", icon: Library },
   { id: "achievements", label: "الإنجازات", icon: Trophy },
@@ -129,7 +129,7 @@ export default function AppShell({ children, currentPage, onNavigate }: Props) {
                 )}
               >
                 <item.icon className="h-5 w-5 flex-shrink-0" />
-                <span className="text-[9px] font-semibold truncate w-full text-center leading-tight">{item.label}</span>
+                <span className="text-[9px] font-semibold w-full text-center leading-tight min-h-[22px]">{item.label}</span>
               </button>
             ))}
           </div>
