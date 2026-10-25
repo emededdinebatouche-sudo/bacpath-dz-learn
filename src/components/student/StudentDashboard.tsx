@@ -30,7 +30,7 @@ export default function StudentDashboard({ onNavigate }: Props) {
               <ListTodo className="h-4 w-4" /> ابدأ مهام اليوم
             </Button>
             <Button onClick={() => onNavigate("exercises")} variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 gap-2">
-              <BookOpen className="h-4 w-4" /> تمارين
+              <BookOpen className="h-4 w-4" /> بكالوريات سابقة
             </Button>
           </div>
         </div>

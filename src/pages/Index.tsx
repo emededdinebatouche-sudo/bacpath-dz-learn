@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import StudentDashboard from "@/components/student/StudentDashboard";
 import StudyPlan from "@/components/student/StudyPlan";
-import Exercises from "@/components/student/Exercises";
+import PastExams from "@/components/student/PastExams";
 import Resources from "@/components/resources/Resources";
 import Achievements from "@/components/student/Achievements";
 import Guide from "@/components/student/Guide";
@@ -48,7 +48,7 @@ const Index = () => {
     if (state.user?.role === "teacher") return <TeacherDashboard />;
     switch (page) {
       case "plan": return <StudyPlan />;
-      case "exercises": return <Exercises />;
+      case "exercises": return <PastExams />;
       case "guide": return <Guide />;
       case "resources": return <Resources />;
       case "achievements": return <Achievements />;
