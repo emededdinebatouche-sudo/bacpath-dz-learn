@@ -43,10 +43,18 @@ export default function PastExams() {
   const intRef = useRef<number | null>(null);
   const beepedRef = useRef(false);
 
+  const [solved, setSolved] = useState<Record<string, boolean>>({});
+
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("past_exams" as any).select("*").order("year", { ascending: false });
+      const [{ data }, { data: att }] = await Promise.all([
+        supabase.from("past_exams" as any).select("*").order("year", { ascending: false }),
+        supabase.from("past_exam_attempts").select("exam_id, correct"),
+      ]);
       setItems((data as any) || []);
+      const map: Record<string, boolean> = {};
+      (att || []).forEach((a: any) => { map[a.exam_id] = a.correct; });
+      setSolved(map);
       setLoading(false);
     })();
   }, []);
@@ -91,11 +99,34 @@ export default function PastExams() {
 
   const finish = async (correct: boolean) => {
     if (!active) return;
-    const award = correct ? active.points : 0;
+    const already = solved[active.id] === true;
+    const award = correct && !already ? active.points : 0;
     if (award > 0 && addPoints) await addPoints(award);
-    toast.success(correct ? `أحسنت! +${award} نقطة` : "لا بأس، حاول لاحقاً");
+    const { data: auth } = await supabase.auth.getUser();
+    if (auth.user) {
+      const keep = correct || already;
+      await supabase.from("past_exam_attempts").upsert(
+        { user_id: auth.user.id, exam_id: active.id, correct: keep },
+        { onConflict: "user_id,exam_id" }
+      );
+      setSolved(s => ({ ...s, [active.id]: keep }));
+    }
+    toast.success(correct ? (award ? `أحسنت! +${award} نقطة` : "أحسنت! سبق أن حللت هذا الامتحان") : "لا بأس، حاول لاحقاً");
     setActive(null); setRunning(false); setElapsed(0); setShowSolution(false);
   };
+
+  const START_YEAR = 2008;
+  const tracker = useMemo(() => {
+    const now = new Date().getFullYear();
+    const rows = [];
+    for (let y = now; y >= START_YEAR; y--) {
+      const exams = items.filter(i => i.year === y && (branch === ALL || i.branch === branch) && (subject === ALL || i.subject === subject));
+      rows.push({ year: y, total: exams.length, done: exams.filter(e => solved[e.id]).length });
+    }
+    return rows;
+  }, [items, solved, branch, subject]);
+  const trackTotal = tracker.reduce((a, r) => a + r.total, 0);
+  const trackDone = tracker.reduce((a, r) => a + r.done, 0);
 
   const totalSec = (active?.duration || 0) * 60;
   const remaining = Math.max(0, totalSec - elapsed);
