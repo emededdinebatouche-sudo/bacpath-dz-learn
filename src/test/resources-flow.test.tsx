@@ -25,7 +25,7 @@ describe("resource management", () => {
     fireEvent.change(screen.getByLabelText("المادة", { selector: "input" }), { target: { value: "الرياضيات" } });
     fireEvent.change(screen.getByLabelText("الرابط"), { target: { value: "https://www.youtube.com/@teacher" } });
     fireEvent.click(screen.getByRole("button", { name: "حفظ المصدر" }));
-    await waitFor(() => expect(state.inserted).toMatchObject({ title: "قناة الرياضيات", category: "channel", created_by: "staff-id", subject: "الرياضيات" }));
+    await waitFor(() => expect(state.inserted).toMatchObject({ title: "قناة الرياضيات", category: "youtube", created_by: "staff-id", subject: "الرياضيات" }));
     expect(await screen.findByRole("link", { name: "فتح المصدر" })).toHaveAttribute("href", "https://www.youtube.com/@teacher");
   });
   it("students browse exercise links without staff controls", async () => {
