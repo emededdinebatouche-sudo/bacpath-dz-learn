@@ -6,7 +6,7 @@ const state = vi.hoisted(() => ({ role: "admin", rows: [] as Record<string, unkn
 vi.mock("@/lib/state", () => ({ useApp: () => ({ user: { id: "staff-id", role: state.role } }) }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: () => ({
-  select: () => ({ order: async () => ({ data: state.rows, error: null }) }),
+  select: () => ({ order: async () => ({ data: state.rows, error: null }), eq: async () => ({ data: [], error: null }) }),
   insert: (values: Record<string, unknown>) => ({ select: () => ({ single: async () => {
     state.inserted = values;
     const row = { ...values, id: "resource-id" };
