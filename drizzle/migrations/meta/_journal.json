@@ -29,6 +29,13 @@
       "when": 1792952992779,
       "tag": "0003_create_past_exam_attempts",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793392062988,
+      "tag": "0004_extend_learning_resource_types",
+      "breakpoints": true
     }
   ]
 }

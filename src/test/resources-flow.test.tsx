@@ -6,7 +6,7 @@ const state = vi.hoisted(() => ({ role: "admin", rows: [] as Record<string, unkn
 vi.mock("@/lib/state", () => ({ useApp: () => ({ user: { id: "staff-id", role: state.role } }) }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: () => ({
-  select: () => ({ order: async () => ({ data: state.rows, error: null }) }),
+  select: () => ({ order: async () => ({ data: state.rows, error: null }), eq: async () => ({ data: [], error: null }) }),
   insert: (values: Record<string, unknown>) => ({ select: () => ({ single: async () => {
     state.inserted = values;
     const row = { ...values, id: "resource-id" };
@@ -25,7 +25,7 @@ describe("resource management", () => {
     fireEvent.change(screen.getByLabelText("المادة", { selector: "input" }), { target: { value: "الرياضيات" } });
     fireEvent.change(screen.getByLabelText("الرابط"), { target: { value: "https://www.youtube.com/@teacher" } });
     fireEvent.click(screen.getByRole("button", { name: "حفظ المصدر" }));
-    await waitFor(() => expect(state.inserted).toMatchObject({ title: "قناة الرياضيات", category: "channel", created_by: "staff-id", subject: "الرياضيات" }));
+    await waitFor(() => expect(state.inserted).toMatchObject({ title: "قناة الرياضيات", category: "youtube", created_by: "staff-id", subject: "الرياضيات" }));
     expect(await screen.findByRole("link", { name: "فتح المصدر" })).toHaveAttribute("href", "https://www.youtube.com/@teacher");
   });
   it("students browse exercise links without staff controls", async () => {

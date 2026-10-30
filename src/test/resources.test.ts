@@ -12,3 +12,15 @@ describe("resource links", () => {
     expect(safeResourceUrl("not a link")).toBeNull();
   });
 });
+import { detectResourceType } from "../lib/resources";
+describe("resource type detection", () => {
+  it("recognises YouTube, Telegram and Drive links", () => {
+    expect(detectResourceType("https://www.youtube.com/@teacher")).toBe("youtube");
+    expect(detectResourceType("https://youtu.be/abc")).toBe("youtube");
+    expect(detectResourceType("https://t.me/bac_math")).toBe("telegram");
+    expect(detectResourceType("https://drive.google.com/file/d/123/view")).toBe("drive");
+  });
+  it("leaves other websites undetected", () => {
+    expect(detectResourceType("https://example.org/exercises.pdf")).toBeNull();
+  });
+});

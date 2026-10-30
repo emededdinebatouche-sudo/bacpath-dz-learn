@@ -101,6 +101,7 @@ export type Database = {
           created_at: string
           created_by: string
           description: string
+          file_path: string | null
           id: string
           subject: string
           title: string
@@ -112,6 +113,7 @@ export type Database = {
           created_at?: string
           created_by: string
           description?: string
+          file_path?: string | null
           id?: string
           subject?: string
           title: string
@@ -123,6 +125,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string
+          file_path?: string | null
           id?: string
           subject?: string
           title?: string
