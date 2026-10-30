@@ -8,6 +8,7 @@ import Auth from "./pages/Auth.tsx";
 import Admin from "./pages/Admin.tsx";
 import OAuthConsent from "./pages/OAuthConsent.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/teacher" element={<Index />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

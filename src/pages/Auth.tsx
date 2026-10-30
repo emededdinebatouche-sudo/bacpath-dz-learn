@@ -71,6 +71,24 @@ export default function AuthPage() {
      
   }, [navigate]);
 
+  const forgotPassword = async () => {
+    const parsed = z.string().trim().email().safeParse(email);
+    if (!parsed.success) {
+      toast({ title: "أدخل بريدك الإلكتروني أولاً", variant: "destructive" });
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setSubmitting(false);
+    if (error) {
+      toast({ title: "تعذّر إرسال الرابط", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "تم إرسال رابط إعادة التعيين", description: "افتح بريدك واضغط على الرابط لاختيار كلمة مرور جديدة" });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -221,6 +239,12 @@ export default function AuthPage() {
               <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="h-11 pr-9" />
             </div>
           </div>
+          {mode === "login" && (
+            <button type="button" onClick={forgotPassword} disabled={submitting} className="text-xs text-primary hover:underline">
+              نسيت كلمة المرور؟
+            </button>
+          )}
+
 
           <Button type="submit" disabled={submitting} className="w-full h-11 bg-gradient-primary hover:opacity-95 shadow-primary mt-2">
             {submitting ? "..." : mode === "login" ? "دخول" : "إنشاء الحساب"}
